@@ -1,0 +1,13 @@
+node_modules
+lib
+scripts
+.git
+.gitignore
+index.ts
+tsconfig.json
+tslint.json
+webpack.config.js
+webpack.config.dev.js
+dist/coverage
+dist/docs
+out

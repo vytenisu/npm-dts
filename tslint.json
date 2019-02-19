@@ -1,0 +1,27 @@
+{
+  "extends": ["tslint:recommended"],
+  "rules": {
+    "indent": [true, "spaces", 2],
+    "quotemark": [true, "single", "avoid-template"],
+    "semicolon": [true, "never"],
+    "no-empty-interface": false,
+    "object-literal-sort-keys": false,
+    "no-trailing-whitespace": [true, "ignore-blank-lines"],
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "completed-docs": [
+      true,
+      {
+        "classes": {"visibilities": ["exported"]},
+        "enums": {"visibilities": ["exported"]},
+        "enum-members": {"visibilities": ["exported"]},
+        "functions": {"visibilities": ["exported"]},
+        "interfaces": {"visibilities": ["exported"]},
+        "methods": {"locations": "all", "privacies": ["public", "protected"]},
+        "namespaces": {"visibilities": ["exported"]},
+        "properties": {"locations": "all", "privacies": ["public", "protected"]},
+        "types": {"visibilities": ["exported"]},
+        "variables": {"visibilities": ["exported"]}
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "dts-auto-bundle",
+  "version": "1.0.0",
+  "description": "Simple DTS single-file generation utility for TypeScript bundles",
+  "main": "dist/index.js",
+  "bin": {
+    "trader-controller": "./dist/index.js"
+  },
+  "scripts": {
+    "prepublishOnly": "npm run lint && npm run test && npm run build && npm run dts && npm run docs",
+    "test": "./node_modules/.bin/jest --forceExit --detectOpenHandles",
+    "testSync": "./node_modules/.bin/jest --runInBand --forceExit --detectOpenHandles",
+    "lint": "./node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json -t stylish ./lib/**/*.ts",
+    "build": "./node_modules/.bin/webpack",
+    "buildDev": "./node_modules/.bin/webpack --config webpack.config.dev.js",
+    "dts": "./node_modules/.bin/dts-generator --prefix dts-auto-bundle --name dts-auto-bundle --project ./ --out index.d.ts --main /index",
+    "docs": "./node_modules/.bin/typedoc --module commonjs --target ES6 --exclude **/*.test.* --ignoreCompilerErrors --out ./dist/docs --readme ./README.md --mode file ./index.ts ./lib",
+    "exec": "node ./dist/index.js -r . generate"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:vytenisu/dts-auto-bundle.git"
+  },
+  "keywords": [
+    "TypeScript",
+    "dts",
+    "tsc",
+    "index.d.ts",
+    "single",
+    "file",
+    "bundle",
+    "simple",
+    "auto"
+  ],
+  "author": "Vytenis Urbonavicius",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/args": "3.0.0",
+    "@types/jest": "23.3.14",
+    "@types/mkdirp": "^0.5.2",
+    "@types/rimraf": "^2.0.2",
+    "dts-generator": "3.0.0",
+    "find-node-modules": "1.0.4",
+    "jest": "23.6.0",
+    "string-replace-webpack-plugin": "0.1.3",
+    "ts-jest": "23.10.5",
+    "ts-loader": "5.3.3",
+    "ts-node": "8.0.2",
+    "tslint": "5.12.1",
+    "typedoc": "0.14.2",
+    "webpack": "4.29.4",
+    "webpack-cli": "3.2.3",
+    "webpack-node-externals": "1.7.2"
+  },
+  "dependencies": {
+    "args": "5.0.0",
+    "mkdirp": "0.5.1",
+    "npm-run": "5.0.1",
+    "rimraf": "2.6.3",
+    "typescript": "3.3.3"
+  }
+}

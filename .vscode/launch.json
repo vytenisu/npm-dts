@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "args": [],
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
+            "name": "DEBUG",
+            "outFiles": [ "${workspaceRoot}/dist/**/*" ],
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/index.ts",
+            "request": "launch",
+            "runtimeArgs": [
+                "--nolazy"
+            ],
+            "runtimeExecutable": null,
+            "sourceMaps": true,
+            "stopOnEntry": false,
+            "type": "node"
+        },
+        {
+            "name": "Attach",
+            "type": "node",
+            "request": "attach",
+            "port": 5858
+        }
+    ]
+}
