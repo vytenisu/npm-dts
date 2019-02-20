@@ -3,7 +3,8 @@ import * as path from 'path'
 
 export enum ICliArgument {
   root = 'root',
-  cacheDir = 'cacheDir',
+  tmp = 'tmp',
+  tsc = 'tsc',
 }
 
 export class Cli {
@@ -11,13 +12,15 @@ export class Cli {
 
   private args: {[name: string]: any} = {
     root: path.resolve(process.cwd()),
-    cacheDir: path.resolve(process.cwd(), 'cache'),
+    tmp: path.resolve(process.cwd(), 'tmp'),
+    tsc: '',
   }
 
   public constructor() {
     args
       .option(['r', 'root'], 'Root path of NPM package', this.args.root)
-      .option(['c', 'cacheDir'], 'Cache directory', this.args.cacheDir)
+      .option(['t', 'tmp'], 'Cache directory', this.args.tmp)
+      .option(['c', 'tsc'], 'Additional TSC options (unchecked pass-through)', this.args.tsc)
       .command('generate', 'Start generation', (name, sub, options) => {
         this.launched = true
         this.storeArguments(options)

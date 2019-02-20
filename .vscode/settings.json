@@ -1,77 +1,66 @@
 {
-	"files.exclude": {
-		"cache": true,
-		"**/.vscode": true,
-		".git": true,
-		"index.d.ts": true,
-		".gitignore": true,
-		"package-lock.json": true,
-		"jest.config.js": true,
-		"tsconfig.json": true,
-		"tslint.json": true,
-		"webpack.config.js": true,
-		"webpack.config.dev.js": true,
-		"scripts": true,
-		"node_modules": true,
-		"dist": true
-	},
-	"todohighlight.keywords": [
-		{
-			"text": "TODO:",
-			"font-weight": "bold",
-			"color": "#ffaa00",
-			"border-bottom": "1px solid red",
-			"borderRadius": "2px", //NOTE: using borderRadius along with `border` or you will see nothing change
-			"backgroundColor": "rgba(0,0,0,0)"
-		},
-		{
-			"text": "FIXME:",
-			"font-weight": "bold",
-			"color": "#ff5522",
-			"border-bottom": "1px solid red",
-			"borderRadius": "2px", //NOTE: using borderRadius along with `border` or you will see nothing change
-			"backgroundColor": "rgba(0,0,0,0)"
-		}
-	],
-	"todohighlight.isCaseSensitive": false,
-	"javascript.implicitProjectConfig.checkJs": true,
-	"editor.detectIndentation": false,
-	"editor.formatOnSave": true,
-	"editor.trimAutoWhitespace": false,
-	"files.eol": "\n",
-	"files.trimTrailingWhitespace": true,
-	"files.insertFinalNewline": true,
-	"debug.inlineValues": true,
-	"html.format.indentInnerHtml": true,
-	"html.format.maxPreserveNewLines": 1,
-	"html.format.indentHandlebars": true,
-	"html.format.extraLiners": "",
-	"typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": true,
-	"coverage-gutters.showLineCoverage": true,
-	"coverage-gutters.lcovname": "dist/coverage/lcov.info",
-	"coverage-gutters.altSfCompare": false,
-	"coverage-gutters.showRulerCoverage": true,
-	"coverage-gutters.showGutterCoverage": true,
-	"tslint.ignoreDefinitionFiles": false,
-	"tslint.autoFixOnSave": true,
-	"tslint.alwaysShowRuleFailuresAsWarnings": true,
-	"tslint.exclude": "**/node_modules/**/*",
-	"editor.wrappingIndent": "indent",
-	"editor.insertSpaces": false,
-	"jsDocCompletion.enabled": false,
-	"cSpell.ignoreRegExpList": [
-		"/E[A-Z][A-Z]+/"
-	],
-	"typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
-	"cSpell.words": [
-		"MAVGS",
-		"USDJPY",
-		"bitbucket",
-		"printf",
-		"typedoc",
-		"urbonavicius",
-		"vytenis",
-		"whitend"
-	],
-	"editor.tabSize": 2
+  "files.exclude": {
+    "cache": true,
+    "**/.vscode": true,
+    ".git": true,
+    "index.d.ts": true,
+    ".gitignore": true,
+    "package-lock.json": true,
+    "jest.config.js": true,
+    "tsconfig.json": true,
+    "tslint.json": true,
+    "webpack.config.js": true,
+    "webpack.config.dev.js": true,
+    "scripts": true,
+    "node_modules": true,
+    "dist": true
+  },
+  "todohighlight.keywords": [
+    {
+      "text": "TODO:",
+      "font-weight": "bold",
+      "color": "#ffaa00",
+      "border-bottom": "1px solid red",
+      "borderRadius": "2px", //NOTE: using borderRadius along with `border` or you will see nothing change
+      "backgroundColor": "rgba(0,0,0,0)"
+    },
+    {
+      "text": "FIXME:",
+      "font-weight": "bold",
+      "color": "#ff5522",
+      "border-bottom": "1px solid red",
+      "borderRadius": "2px", //NOTE: using borderRadius along with `border` or you will see nothing change
+      "backgroundColor": "rgba(0,0,0,0)"
+    }
+  ],
+  "todohighlight.isCaseSensitive": false,
+  "javascript.implicitProjectConfig.checkJs": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.trimAutoWhitespace": false,
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "debug.inlineValues": true,
+  "html.format.indentInnerHtml": true,
+  "html.format.maxPreserveNewLines": 1,
+  "html.format.indentHandlebars": true,
+  "html.format.extraLiners": "",
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis": true,
+  "coverage-gutters.showLineCoverage": true,
+  "coverage-gutters.lcovname": "dist/coverage/lcov.info",
+  "coverage-gutters.showRulerCoverage": true,
+  "coverage-gutters.showGutterCoverage": true,
+  "tslint.ignoreDefinitionFiles": false,
+  "tslint.autoFixOnSave": true,
+  "tslint.alwaysShowRuleFailuresAsWarnings": true,
+  "tslint.exclude": "**/node_modules/**/*",
+  "editor.wrappingIndent": "indent",
+  "cSpell.ignoreRegExpList": ["/E[A-Z][A-Z]+/"],
+  "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
+  "cSpell.words": ["MAVGS", "USDJPY", "bitbucket", "printf", "typedoc", "urbonavicius", "vytenis", "whitend"],
+  "editor.tabSize": 2,
+  "prettier.useTabs": false,
+  "editor.useTabStops": false,
+  "editor.insertSpaces": true
 }
