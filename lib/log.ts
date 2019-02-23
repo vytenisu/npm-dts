@@ -63,6 +63,10 @@ export const silly = (message: string) => {
   return winstonSilly(message)
 }
 
+/**
+ * Initializes logging
+ * @param label prefix to be used before each log line
+ */
 export const init = (label: string) => {
   winston.configure({
     level: 'verbose',
@@ -71,19 +75,9 @@ export const init = (label: string) => {
       winston.format.label({label}),
       winston.format.timestamp(),
       winston.format.prettyPrint(),
-      winston.format.printf((parts: any) => {
-        const date = new Date(parts.timestamp)
-        const localeDate = date.toLocaleString(undefined, {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          timeZone: 'GMT',
-        })
-        return `GMT ${localeDate}.${date.getMilliseconds()} [${parts.label}] [${parts.level}] : ${parts.message}`
-      }),
+      winston.format.printf(
+        (parts: any) => `[${parts.label}] [${parts.level}] : ${parts.message}`,
+      ),
     ),
     transports: [new winston.transports.Console()],
   })

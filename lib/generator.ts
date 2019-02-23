@@ -5,33 +5,47 @@ import * as npmRun from 'npm-run'
 import {join, relative, resolve} from 'path'
 import * as rm from 'rimraf'
 import {Cli, ICliArgument} from './cmd'
-import {debug, error, info, init, verbose, warn} from './log'
+import {debug, error, init, verbose} from './log'
 
 const MKDIR_RETRIES = 5
 
+/**
+ * Logic for generating aggregated typings for NPM module
+ */
 export class Generator extends Cli {
   private packageInfo: any
+  private moduleNames: string[]
 
+  /**
+   * Auto-launches generation based on command line arguments
+   */
   public constructor() {
     super()
 
     init('npm-dts')
 
-    this.generate() /*.catch(e => {
+    this.generate().catch(e => {
       error('Generation of index.d.ts has failed!')
 
       if (e) {
         debug(`Error: ${JSON.stringify(e)}`)
       }
-    })*/
+    })
   }
 
+  /**
+   * Logs serialized error if it exists
+   * @param e - error to be shown
+   */
   private showDebugError(e: any) {
     if (e) {
       debug(`Error: ${JSON.stringify(e)}`)
     }
   }
 
+  /**
+   * Launches generation of typings
+   */
   private async generate() {
     verbose('Starting generation...')
 
@@ -43,18 +57,31 @@ export class Generator extends Cli {
     verbose('Generation is completed!')
   }
 
+  /**
+   * Gathers entry file address (relative to project root path)
+   */
   private getEntry() {
     return this.getArgument(ICliArgument.entry)
   }
 
+  /**
+   * Gathers target project root path
+   */
   private getRoot() {
     return resolve(this.getArgument(ICliArgument.root))
   }
 
+  /**
+   * Gathers TMP directory to be used for TSC operations
+   */
   private getTempDir() {
     return resolve(this.getArgument(ICliArgument.tmp))
   }
 
+  /**
+   * Creates TMP directory to be used for TSC operations
+   * @param retries amount of times to retry on failure
+   */
   private makeTempDir(retries = MKDIR_RETRIES) {
     const tmpDir = this.getTempDir()
     verbose(`Creating tmp directory at ${tmpDir}...`)
@@ -84,6 +111,9 @@ export class Generator extends Cli {
     })
   }
 
+  /**
+   * Removes TMP directory
+   */
   private clearTempDir() {
     const tmpDir = this.getTempDir()
     verbose(`Clearing tmp directory at ${tmpDir}...`)
@@ -102,6 +132,9 @@ export class Generator extends Cli {
     })
   }
 
+  /**
+   * Re-creates empty TMP directory to be used for TSC operations
+   */
   private resetCacheDir() {
     verbose('Will now reset tmp directory...')
     return new Promise((done, fail) => {
@@ -111,6 +144,9 @@ export class Generator extends Cli {
     })
   }
 
+  /**
+   * Generates per-file typings using TSC
+   */
   private async generateTypings() {
     await this.resetCacheDir()
 
@@ -149,7 +185,15 @@ export class Generator extends Cli {
     verbose('Per-file typings have been generated using TSC!')
   }
 
-  private getDeclarationFiles(dir: string = this.getTempDir(), files: string[] = []) {
+  /**
+   * Gathers a list of created per-file declaration files
+   * @param dir directory to be scanned for files (called during recursion)
+   * @param files discovered array of files (called during recursion)
+   */
+  private getDeclarationFiles(
+    dir: string = this.getTempDir(),
+    files: string[] = [],
+  ) {
     if (dir === this.getTempDir()) {
       verbose('Loading list of generated typing files...')
     }
@@ -175,6 +219,9 @@ export class Generator extends Cli {
     return files
   }
 
+  /**
+   * Loads package.json information of target project
+   */
   private getPackageDetails() {
     if (this.packageInfo) {
       return this.packageInfo
@@ -186,7 +233,9 @@ export class Generator extends Cli {
     const packageJsonPath = resolve(root, 'package.json')
 
     try {
-      this.packageInfo = JSON.parse(readFileSync(packageJsonPath, {encoding: 'utf8'}))
+      this.packageInfo = JSON.parse(
+        readFileSync(packageJsonPath, {encoding: 'utf8'}),
+      )
     } catch (e) {
       error(`Failed to read package.json at '${packageJsonPath}'`)
       this.showDebugError(e)
@@ -197,18 +246,29 @@ export class Generator extends Cli {
     return this.packageInfo
   }
 
-  private convertPathToModule(path: string, useRoot: boolean | string = false) {
+  /**
+   * Generates module name based on file path
+   * @param path path to be converted to module name
+   * @param useRoot assumes path to be under target project root
+   * @param noPrefix disables addition of module name as prefix for module name
+   */
+  private convertPathToModule(
+    path: string,
+    useRoot: boolean = false,
+    noPrefix = false,
+  ) {
     const packageDetails = this.getPackageDetails()
 
-    if (typeof useRoot === 'string') {
-      path = resolve(useRoot, path) // FIXME: This is wrong
-    } else if (useRoot) {
+    if (useRoot) {
       path = relative(this.getRoot(), path)
     } else {
       path = relative(this.getTempDir(), path)
     }
 
-    path = `${packageDetails.name}/${path}`
+    if (!noPrefix) {
+      path = `${packageDetails.name}/${path}`
+    }
+
     path = path.replace(/\\/g, '/')
     path = path.replace(/\..+$/g, '')
     path = path.replace(/\.d$/g, '')
@@ -216,6 +276,9 @@ export class Generator extends Cli {
     return path
   }
 
+  /**
+   * Loads generated per-file declaration files
+   */
   private loadTypings() {
     const result: IDeclarationMap = {}
 
@@ -238,32 +301,53 @@ export class Generator extends Cli {
     return result
   }
 
-  private resolveRelativeSources(source: string, moduleName: string) {
+  /**
+   * Alters import sources to avoid relative addresses and default index usage
+   * @param source import source to be resolved
+   * @param moduleName name of module containing import
+   */
+  private resolveImportSources(source: string, moduleName: string) {
     source = source.replace(/\r\n/g, '\n')
     source = source.replace(/\n\r/g, '\n')
     source = source.replace(/\r/g, '\n')
 
-    const lines = source.split('\n')
+    let lines = source.split('\n')
 
-    lines.map(line => {
-      const matches = line.match(/import .* from ['"]([^'"]+)['"]/)
+    lines = lines.map(line => {
+      const matches = line.match(/from ['"]([^'"]+)['"]/)
 
-      if (matches) {
-        console.log(matches[1])
-        console.log(moduleName)
-        const resolvedModule = this.convertPathToModule(matches[1], moduleName)
-        console.log(resolvedModule)
+      if (matches && matches[1].startsWith('.')) {
+        const relativePath = `../${matches[1]}`
+
+        let resolvedModule = resolve(moduleName, relativePath)
+        resolvedModule = this.convertPathToModule(resolvedModule, true, true)
+
+        if (!this.moduleExists(resolvedModule)) {
+          resolvedModule += '/index'
+        }
+
+        line = line.replace(
+          /(from ['"])([^'"]+)(['"])/,
+          `$1${resolvedModule}$3`,
+        )
       }
 
       return line
     })
 
+    source = lines.join('\n')
+
     return source
   }
 
+  /**
+   * Combines typings into a single declaration source
+   */
   private combineTypings() {
     const typings = this.loadTypings()
     this.clearTempDir()
+
+    this.moduleNames = Object.keys(typings)
 
     verbose('Combining typings into single file...')
 
@@ -271,14 +355,31 @@ export class Generator extends Cli {
 
     Object.entries(typings).forEach(([moduleName, fileSource]) => {
       fileSource = fileSource.replace(/declare /g, '')
-      fileSource = this.resolveRelativeSources(fileSource, moduleName)
-      sourceParts.push(`declare module '${moduleName}' {\n${(fileSource as string).replace(/^./gm, '  $&')}\n}`)
+      fileSource = this.resolveImportSources(fileSource, moduleName)
+      sourceParts.push(
+        `declare module '${moduleName}' {\n${(fileSource as string).replace(
+          /^./gm,
+          '  $&',
+        )}\n}`,
+      )
     })
 
     verbose('Combined typings into a single file!')
     return sourceParts.join('\n')
   }
 
+  /**
+   * Verifies if module specified exists among known modules
+   * @param moduleName name of module to be checked
+   */
+  private moduleExists(moduleName: string) {
+    return this.moduleNames.includes(moduleName)
+  }
+
+  /**
+   * Adds alias for main NPM package file to generated index.d.ts source
+   * @param source generated index.d.ts declaration source so far
+   */
   private addAlias(source: string) {
     verbose('Adding alias for main file of the package...')
 
@@ -303,6 +404,10 @@ export class Generator extends Cli {
     return source
   }
 
+  /**
+   * Stores generated index.d.ts declaration source into file
+   * @param source generated index.d.ts source
+   */
   private storeResult(source: string) {
     verbose('Storing typings into index.d.ts file...')
 
@@ -321,6 +426,9 @@ export class Generator extends Cli {
   }
 }
 
+/**
+ * Map of modules and their declarations
+ */
 export interface IDeclarationMap {
-  [path: string]: string
+  [moduleNames: string]: string
 }
