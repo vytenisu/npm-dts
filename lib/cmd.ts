@@ -2,6 +2,7 @@ import * as args from 'args'
 import * as path from 'path'
 
 export enum ICliArgument {
+  entry = 'entry',
   root = 'root',
   tmp = 'tmp',
   tsc = 'tsc',
@@ -11,6 +12,7 @@ export class Cli {
   protected launched = false
 
   private args: {[name: string]: any} = {
+    entry: 'index.ts',
     root: path.resolve(process.cwd()),
     tmp: path.resolve(process.cwd(), 'tmp'),
     tsc: '',
@@ -18,6 +20,7 @@ export class Cli {
 
   public constructor() {
     args
+      .option(['e', 'entry'], 'Entry/main package file before bundling')
       .option(['r', 'root'], 'Root path of NPM package', this.args.root)
       .option(['t', 'tmp'], 'Cache directory', this.args.tmp)
       .option(['c', 'tsc'], 'Additional TSC options (unchecked pass-through)', this.args.tsc)
