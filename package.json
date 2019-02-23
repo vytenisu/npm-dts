@@ -1,10 +1,10 @@
 {
-  "name": "dts-auto-bundle",
+  "name": "npm-dts",
   "version": "1.0.0",
   "description": "Simple DTS single-file generation utility for TypeScript bundles",
   "main": "dist/index.js",
   "bin": {
-    "trader-controller": "./dist/index.js"
+    "npm-dts": "./dist/index.js"
   },
   "scripts": {
     "prepublishOnly": "npm run lint && npm run test && npm run build && npm run dts && npm run docs",
@@ -37,9 +37,9 @@
   "devDependencies": {
     "@types/args": "3.0.0",
     "@types/jest": "23.3.14",
-    "@types/mkdirp": "^0.5.2",
-    "@types/rimraf": "^2.0.2",
-    "@types/winston": "^2.4.4",
+    "@types/mkdirp": "0.5.2",
+    "@types/rimraf": "2.0.2",
+    "@types/winston": "2.4.4",
     "dts-generator": "2.1.0",
     "find-node-modules": "1.0.4",
     "jest": "23.6.0",

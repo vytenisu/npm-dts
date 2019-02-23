@@ -58,7 +58,17 @@
   "editor.wrappingIndent": "indent",
   "cSpell.ignoreRegExpList": ["/E[A-Z][A-Z]+/"],
   "typescript.format.insertSpaceAfterFunctionKeywordForAnonymousFunctions": false,
-  "cSpell.words": ["MAVGS", "USDJPY", "bitbucket", "printf", "typedoc", "urbonavicius", "vytenis", "whitend"],
+  "cSpell.words": [
+    "MAVGS",
+    "USDJPY",
+    "bitbucket",
+    "printf",
+    "typedoc",
+    "urbonavicius",
+    "vytenis",
+    "vytenisu",
+    "whitend"
+  ],
   "editor.tabSize": 2,
   "prettier.useTabs": false,
   "editor.useTabStops": false,

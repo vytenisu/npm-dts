@@ -254,14 +254,16 @@ export class Generator extends Cli {
    */
   private convertPathToModule(
     path: string,
-    useRoot: boolean = false,
+    rootType: IBasePathType = IBasePathType.tmp,
     noPrefix = false,
   ) {
     const packageDetails = this.getPackageDetails()
 
-    if (useRoot) {
+    if (rootType === IBasePathType.cwd) {
+      path = relative(process.cwd(), path)
+    } else if (rootType === IBasePathType.root) {
       path = relative(this.getRoot(), path)
-    } else {
+    } else if (rootType === IBasePathType.tmp) {
       path = relative(this.getTempDir(), path)
     }
 
@@ -301,6 +303,34 @@ export class Generator extends Cli {
     return result
   }
 
+  private resolveImportSourcesAtLine(
+    regexp: RegExp,
+    line: string,
+    moduleName: string,
+  ) {
+    const matches = line.match(regexp)
+
+    if (matches && matches[2].startsWith('.')) {
+      const relativePath = `../${matches[2]}`
+
+      let resolvedModule = resolve(moduleName, relativePath)
+
+      resolvedModule = this.convertPathToModule(
+        resolvedModule,
+        IBasePathType.cwd,
+        true,
+      )
+
+      if (!this.moduleExists(resolvedModule)) {
+        resolvedModule += '/index'
+      }
+
+      line = line.replace(regexp, `$1${resolvedModule}$3`)
+    }
+
+    return line
+  }
+
   /**
    * Alters import sources to avoid relative addresses and default index usage
    * @param source import source to be resolved
@@ -314,23 +344,17 @@ export class Generator extends Cli {
     let lines = source.split('\n')
 
     lines = lines.map(line => {
-      const matches = line.match(/from ['"]([^'"]+)['"]/)
+      line = this.resolveImportSourcesAtLine(
+        /(from ['"])([^'"]+)(['"])/,
+        line,
+        moduleName,
+      )
 
-      if (matches && matches[1].startsWith('.')) {
-        const relativePath = `../${matches[1]}`
-
-        let resolvedModule = resolve(moduleName, relativePath)
-        resolvedModule = this.convertPathToModule(resolvedModule, true, true)
-
-        if (!this.moduleExists(resolvedModule)) {
-          resolvedModule += '/index'
-        }
-
-        line = line.replace(
-          /(from ['"])([^'"]+)(['"])/,
-          `$1${resolvedModule}$3`,
-        )
-      }
+      line = this.resolveImportSourcesAtLine(
+        /(import\(['"])([^'"]+)(['"]\))/,
+        line,
+        moduleName,
+      )
 
       return line
     })
@@ -391,7 +415,7 @@ export class Generator extends Cli {
       throw new Error('No entry file is available!')
     }
 
-    const mainFile = this.convertPathToModule(entry, true)
+    const mainFile = this.convertPathToModule(entry, IBasePathType.cwd)
 
     source +=
       `\ndeclare module '${packageDetails.name}' {\n` +
@@ -431,4 +455,13 @@ export class Generator extends Cli {
  */
 export interface IDeclarationMap {
   [moduleNames: string]: string
+}
+
+/**
+ * Types of base path used during path resolving
+ */
+export enum IBasePathType {
+  root = 'root',
+  tmp = 'tmp',
+  cwd = 'cwd',
 }
