@@ -1,4 +1,4 @@
-# dts-auto-bundle
+# npm-dts
 
 Generates single dts file for bundling TypeScript NPM packages
 
