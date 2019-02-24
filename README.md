@@ -1,6 +1,6 @@
 # npm-dts
 
-_by Vytenis Urbonavičius, 2019_
+_by Vytenis Urbonavičius_
 
 This utility generates single index.d.ts file for whole NPM package.
 
@@ -27,7 +27,20 @@ cd /your/project
 npm-dts -r . generate
 ```
 
-**Supported additional configuration:**
+**Integration into package.json:**
+
+```
+{
+  ......
+  "scripts": {
+    "prepublishOnly": "npm run dts && ......",
+    "dts": "./node_modules/.bin/npm-dts -r . generate"
+  }
+  ......
+}
+```
+
+**Additional supported configuration:**
 
 - **-e** - change main src file from index.ts to something else
 - **-r** - root of your project containing project.json
