@@ -16,3 +16,4 @@ cache
 .prettierrc
 global.d.ts
 jest.config.js
+test/sources/default/index.d.ts

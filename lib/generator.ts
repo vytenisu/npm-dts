@@ -60,22 +60,29 @@ export class Generator extends Cli {
   /**
    * Gathers entry file address (relative to project root path)
    */
-  private getEntry() {
+  private getEntry(): string {
     return this.getArgument(ICliArgument.entry)
   }
 
   /**
    * Gathers target project root path
    */
-  private getRoot() {
+  private getRoot(): string {
     return resolve(this.getArgument(ICliArgument.root))
   }
 
   /**
    * Gathers TMP directory to be used for TSC operations
    */
-  private getTempDir() {
+  private getTempDir(): string {
     return resolve(this.getArgument(ICliArgument.tmp))
+  }
+
+  /**
+   * Checks if script is forced to use its built-in TSC
+   */
+  private useOwnTsc(): boolean {
+    return this.getArgument(ICliArgument.ownTsc)
   }
 
   /**
@@ -164,7 +171,7 @@ export class Generator extends Cli {
     npmRun.execSync(
       cmd,
       {
-        cwd: this.getRoot(),
+        cwd: this.useOwnTsc() ? resolve(__dirname, '..') : this.getRoot(),
       },
       (err: any, stdout: any, stderr: any) => {
         if (err) {

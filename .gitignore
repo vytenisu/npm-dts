@@ -5,3 +5,4 @@ index.d.ts
 dist
 cache
 out
+tmp
