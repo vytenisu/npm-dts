@@ -17,3 +17,4 @@ cache
 global.d.ts
 jest.config.js
 test/sources/default/index.d.ts
+index.d.ts
