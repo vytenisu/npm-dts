@@ -27,6 +27,8 @@ cd /your/project
 npm-dts -r . generate
 ```
 
+Please make sure that target project has "typescript" installed (in _node_modules_).
+
 **Integration into package.json:**
 
 ```
