@@ -13,7 +13,7 @@
     "lint": "./node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json -t stylish ./lib/**/*.ts",
     "build": "./node_modules/.bin/webpack",
     "buildDev": "./node_modules/.bin/webpack --config webpack.config.dev.js",
-    "docs": "./node_modules/.bin/typedoc --module commonjs --target ES6 --exclude **/*.test.* --ignoreCompilerErrors --out ./dist/docs --readme ./README.md --mode file ./index.ts ./lib",
+    "docs": "./node_modules/.bin/typedoc --module commonjs --target ES6 --exclude **/*.test.* --ignoreCompilerErrors --out ./docs --readme ./README.md --mode file ./index.ts ./lib",
     "exec": "node ./dist/index.js -r . generate"
   },
   "homepage": "https://github.com/vytenisu/npm-dts",
