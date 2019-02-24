@@ -6,5 +6,3 @@ export class B extends C {
     process.stdout.write(`\nB: ${text}\n`)
   }
 }
-
-export type ISuggestedText = string

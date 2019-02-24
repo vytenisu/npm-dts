@@ -81,8 +81,8 @@ export class Generator extends Cli {
   /**
    * Checks if script is forced to use its built-in TSC
    */
-  private useOwnTsc(): boolean {
-    return this.getArgument(ICliArgument.ownTsc)
+  private useTestMode(): boolean {
+    return this.getArgument(ICliArgument.testMode)
   }
 
   /**
@@ -171,7 +171,7 @@ export class Generator extends Cli {
     npmRun.execSync(
       cmd,
       {
-        cwd: this.useOwnTsc() ? resolve(__dirname, '..') : this.getRoot(),
+        cwd: this.useTestMode() ? resolve(__dirname, '..') : this.getRoot(),
       },
       (err: any, stdout: any, stderr: any) => {
         if (err) {

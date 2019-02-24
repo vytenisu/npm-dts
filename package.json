@@ -7,7 +7,7 @@
     "npm-dts": "cli.js"
   },
   "scripts": {
-    "prepublishOnly": "npm run lint && npm run build && npm run docs",
+    "prepublishOnly": "npm run lint && npm run build && npm run test && npm run docs",
     "test": "./node_modules/.bin/jest --forceExit --detectOpenHandles",
     "testSync": "./node_modules/.bin/jest --runInBand --forceExit --detectOpenHandles",
     "lint": "./node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json -t stylish ./lib/**/*.ts",

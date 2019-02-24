@@ -1,5 +1,7 @@
-import {B, ISuggestedText} from './b'
+import * as winston from 'winston'
+import {B} from './b'
 import {IText} from './c'
+import {ISuggestedText} from './interfaces'
 
 export class A extends B {
   public static test(text: IText) {
@@ -8,6 +10,7 @@ export class A extends B {
   }
 
   public static getText(): ISuggestedText {
-    return 'test'
+    winston.warn('warn')
+    return {value: 'test'}
   }
 }

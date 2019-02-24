@@ -28,7 +28,7 @@ export enum ICliArgument {
   /**
    * Flag which forces using own TSC as opposed to target TSC
    */
-  ownTsc = 'ownTsc',
+  testMode = 'testMode',
 }
 
 /**
@@ -48,7 +48,7 @@ export class Cli {
     root: path.resolve(process.cwd()),
     tmp: path.resolve(process.cwd(), 'tmp'),
     tsc: '',
-    ownTsc: false,
+    testMode: false,
   }
 
   /**
@@ -76,9 +76,9 @@ export class Cli {
         this.args.tsc,
       )
       .option(
-        ['o', 'ownTsc'],
-        'Forces npm-dts to use its built-in TypeScript version',
-        this.args.ownTsc,
+        ['t', 'testMode'],
+        'Configures npm-dts for self-test',
+        this.args.testMode,
       )
       .command('generate', 'Start generation', (name, sub, options) => {
         this.launched = true
