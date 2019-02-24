@@ -1,6 +1,7 @@
 const webpack = require( 'webpack' );
 const nodeExternals = require( 'webpack-node-externals' );
 const StringReplacePlugin = require( 'string-replace-webpack-plugin' );
+const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
 
 exportedConfig = {  
 	entry: ( __dirname + '/index.ts' ),
@@ -8,6 +9,9 @@ exportedConfig = {
 	devtool: 'inline-source-map',
 	externals: [
 		nodeExternals()
+	],
+	plugins: [
+		new LicenseWebpackPlugin()
 	],
 	mode: 'development',
 	resolve: {

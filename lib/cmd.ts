@@ -5,9 +5,24 @@ import * as path from 'path'
  * CLI argument names
  */
 export enum ICliArgument {
+  /**
+   * Main file of non-bundled package source
+   */
   entry = 'entry',
+
+  /**
+   * Root directory of targeted package
+   */
   root = 'root',
+
+  /**
+   * Temporary directory required during generation
+   */
   tmp = 'tmp',
+
+  /**
+   * Additional TSC properties
+   */
   tsc = 'tsc',
 }
 
@@ -59,12 +74,12 @@ export class Cli {
         this.storeArguments(options)
       })
       .example(
-        'dts-auto-bundle -r . generate',
+        'npm-dts -r . generate',
         'Generates index.d.ts file and updates package.json for CWD.',
       )
 
     args.parse(process.argv, {
-      name: 'dts-auto-bundle',
+      name: 'npm-dts',
       mri: {},
       mainColor: 'yellow',
       subColor: 'dim',

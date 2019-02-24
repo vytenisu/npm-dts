@@ -9,5 +9,10 @@ tslint.json
 webpack.config.js
 webpack.config.dev.js
 dist/coverage
-dist/docs
-out
+tmp
+.vscode
+cache
+.npmignore
+.prettierrc
+global.d.ts
+jest.config.js

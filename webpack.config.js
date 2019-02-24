@@ -1,6 +1,7 @@
 const webpack = require( 'webpack' );
 const nodeExternals = require( 'webpack-node-externals' );
 const StringReplacePlugin = require( 'string-replace-webpack-plugin' );
+const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
 
 exportedConfig = {  
 	entry: ( __dirname + '/index.ts' ),
@@ -12,6 +13,9 @@ exportedConfig = {
 	mode: 'production',
 	externals: [
 		nodeExternals()
+	],
+	plugins: [
+		new LicenseWebpackPlugin()
 	],
 	resolve: {
 		extensions: [ '.webpack.js', '.web.js', '.ts', '.js' ]

@@ -461,7 +461,18 @@ export interface IDeclarationMap {
  * Types of base path used during path resolving
  */
 export enum IBasePathType {
+  /**
+   * Base path is root of targeted project
+   */
   root = 'root',
+
+  /**
+   * Base path is tmp directory
+   */
   tmp = 'tmp',
+
+  /**
+   * Base path is CWD
+   */
   cwd = 'cwd',
 }
