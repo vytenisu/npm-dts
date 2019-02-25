@@ -44,8 +44,8 @@ export class Generator extends Cli {
   /**
    * Executes generation of single declaration file
    */
-  public generate() {
-    this._generate().catch(e => {
+  public async generate() {
+    await this._generate().catch(e => {
       error('Generation of index.d.ts has failed!')
 
       if (e) {
