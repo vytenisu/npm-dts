@@ -4,9 +4,17 @@ _by Vytenis Urbonavičius_
 
 This utility generates single index.d.ts file for whole NPM package.
 
-It allows creating NPM library packages without TypeScript sources and yet still keeping code suggestions wherever these libraries are imported.
+It allows creating NPM library packages without TypeScript sources and yet still keeping code suggestions wherever these libraries are imported. Typescript picks up index.d.ts automatically.
 
 # Installation
+
+Local:
+
+```
+npm install npm-dts
+```
+
+Global:
 
 ```
 npm install -g npm-dts
@@ -14,29 +22,29 @@ npm install -g npm-dts
 
 # Usage
 
+Please make sure that target project has "typescript" installed (in _node_modules_).
+
 **To see full _CLI_ help, run without arguments:**
 
 ```
 npm-dts
 ```
 
-**Typical usage:**
+**Typical usage (global install):**
 
 ```
 cd /your/project
-npm-dts -r . generate
+npm-dts generate
 ```
 
-Please make sure that target project has "typescript" installed (in _node_modules_).
-
-**Integration into package.json:**
+**Integration into package.json (local install):**
 
 ```
 {
   ......
   "scripts": {
     "prepublishOnly": "npm run dts && ......",
-    "dts": "./node_modules/.bin/npm-dts -r . generate"
+    "dts": "./node_modules/.bin/npm-dts generate"
   }
   ......
 }

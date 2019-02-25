@@ -27,6 +27,7 @@
   "keywords": [
     "NPM",
     "dts",
+    "cli",
     "package",
     "ts",
     "TypeScript",
@@ -35,6 +36,7 @@
     "single",
     "file",
     "bundle",
+    "concatenate",
     "simple",
     "auto",
     "generator",
