@@ -67,7 +67,7 @@ export interface INpmDtsArgs {
    * This should only be used for testing npm-dts itself
    * This is because it generates incorrect module names
    */
-  testMode: boolean
+  testMode?: boolean
 }
 
 /**
