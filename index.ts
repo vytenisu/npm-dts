@@ -1,3 +1,1 @@
-import {Generator} from './lib/generator'
-
-const generator = new Generator()
+export {Generator} from './lib/generator'

@@ -1,5 +1,6 @@
 {
   "files.exclude": {
+    "docs": true,
     "cache": true,
     "**/.vscode": true,
     ".git": true,

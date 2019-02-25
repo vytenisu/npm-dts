@@ -3,7 +3,7 @@ import {readFileSync, unlinkSync} from 'fs'
 import * as path from 'path'
 
 describe('Default behavior', () => {
-  const scriptPath = path.resolve(__dirname, '..', '..', 'dist', 'index.js')
+  const scriptPath = path.resolve(__dirname, '..', '..', 'cli.js')
   const projectPath = path.resolve(__dirname, '..', 'sources', 'default')
 
   const dtsPath = path.resolve(
@@ -85,5 +85,9 @@ describe('Default behavior', () => {
         ),
       ).toBeTruthy()
     })
+  })
+
+  it('exports main NPM package module', () => {
+    expect(source.includes('declare module \'test-default\'')).toBeTruthy()
   })
 })

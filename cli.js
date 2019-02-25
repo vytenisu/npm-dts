@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-var cli = require('./dist/index')
+new (require('./dist/index')).Generator().generate()

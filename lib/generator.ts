@@ -4,7 +4,7 @@ import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
 import {join, relative, resolve} from 'path'
 import * as rm from 'rimraf'
-import {Cli, ICliArgument} from './cmd'
+import {Cli, ECliArgument, INpmDtsArgs} from './cli'
 import {debug, error, init, verbose} from './log'
 
 const MKDIR_RETRIES = 5
@@ -15,20 +15,44 @@ const MKDIR_RETRIES = 5
 export class Generator extends Cli {
   private packageInfo: any
   private moduleNames: string[]
+  private throwErrors: boolean
 
   /**
    * Auto-launches generation based on command line arguments
+   * @param injectedArguments generation arguments (same as CLI)
+   * @param enableLog enables logging when true, null allows application to decide
+   * @param throwErrors makes generation throw errors when true
    */
-  public constructor() {
-    super()
+  public constructor(
+    injectedArguments?: INpmDtsArgs,
+    enableLog: boolean | null = null,
+    throwErrors = false,
+  ) {
+    super(injectedArguments)
 
-    init('npm-dts')
+    this.throwErrors = throwErrors
 
-    this.generate().catch(e => {
+    if (enableLog === null) {
+      enableLog = !injectedArguments
+    }
+
+    if (enableLog) {
+      init('npm-dts')
+    }
+  }
+
+  /**
+   * Executes generation of single declaration file
+   */
+  public generate() {
+    this._generate().catch(e => {
       error('Generation of index.d.ts has failed!')
 
       if (e) {
         debug(`Error: ${JSON.stringify(e)}`)
+        if (this.throwErrors) {
+          throw e
+        }
       }
     })
   }
@@ -46,7 +70,7 @@ export class Generator extends Cli {
   /**
    * Launches generation of typings
    */
-  private async generate() {
+  private async _generate() {
     verbose('Starting generation...')
 
     await this.generateTypings()
@@ -61,28 +85,28 @@ export class Generator extends Cli {
    * Gathers entry file address (relative to project root path)
    */
   private getEntry(): string {
-    return this.getArgument(ICliArgument.entry)
+    return this.getArgument(ECliArgument.entry) as string
   }
 
   /**
    * Gathers target project root path
    */
   private getRoot(): string {
-    return resolve(this.getArgument(ICliArgument.root))
+    return resolve(this.getArgument(ECliArgument.root) as string)
   }
 
   /**
    * Gathers TMP directory to be used for TSC operations
    */
   private getTempDir(): string {
-    return resolve(this.getArgument(ICliArgument.tmp))
+    return resolve(this.getArgument(ECliArgument.tmp) as string)
   }
 
   /**
    * Checks if script is forced to use its built-in TSC
    */
   private useTestMode(): boolean {
-    return this.getArgument(ICliArgument.testMode)
+    return this.getArgument(ECliArgument.testMode) as boolean
   }
 
   /**
@@ -159,7 +183,7 @@ export class Generator extends Cli {
 
     verbose('Generating per-file typings using TSC...')
 
-    const tscOptions = this.getArgument(ICliArgument.tsc)
+    const tscOptions = this.getArgument(ECliArgument.tsc) as string
 
     const cmd =
       'tsc --declaration --emitDeclarationOnly --declarationDir ' +

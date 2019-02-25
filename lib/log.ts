@@ -15,12 +15,18 @@ winston.addColors({
   debug: 'green',
 })
 
+let logEnabled = false
+
 /**
  * Logs error message
  * @param message Message to be logged
  */
 export const error = (message: string) => {
-  return winstonError(message)
+  if (logEnabled) {
+    return winstonError(message)
+  } else {
+    return null
+  }
 }
 
 /**
@@ -28,7 +34,11 @@ export const error = (message: string) => {
  * @param message Message to be logged
  */
 export const warn = (message: string) => {
-  return winstonWarn(message)
+  if (logEnabled) {
+    return winstonWarn(message)
+  } else {
+    return null
+  }
 }
 
 /**
@@ -36,7 +46,11 @@ export const warn = (message: string) => {
  * @param message Message to be logged
  */
 export const info = (message: string) => {
-  return winstonInfo(message)
+  if (logEnabled) {
+    return winstonInfo(message)
+  } else {
+    return null
+  }
 }
 
 /**
@@ -44,7 +58,11 @@ export const info = (message: string) => {
  * @param message Message to be logged
  */
 export const verbose = (message: string) => {
-  return winstonVerbose(message)
+  if (logEnabled) {
+    return winstonVerbose(message)
+  } else {
+    return null
+  }
 }
 
 /**
@@ -52,7 +70,11 @@ export const verbose = (message: string) => {
  * @param message Message to be logged
  */
 export const debug = (message: string) => {
-  return winstonDebug(message)
+  if (logEnabled) {
+    return winstonDebug(message)
+  } else {
+    return null
+  }
 }
 
 /**
@@ -60,11 +82,15 @@ export const debug = (message: string) => {
  * @param message Message to be logged
  */
 export const silly = (message: string) => {
-  return winstonSilly(message)
+  if (logEnabled) {
+    return winstonSilly(message)
+  } else {
+    return null
+  }
 }
 
 /**
- * Initializes logging
+ * Initializes and enables logging
  * @param label prefix to be used before each log line
  */
 export const init = (label: string) => {
@@ -81,4 +107,6 @@ export const init = (label: string) => {
     ),
     transports: [new winston.transports.Console()],
   })
+
+  logEnabled = true
 }

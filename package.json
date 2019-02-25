@@ -7,14 +7,15 @@
     "npm-dts": "cli.js"
   },
   "scripts": {
-    "prepublishOnly": "npm run lint && npm run build && npm run test && npm run docs",
+    "prepublishOnly": "npm run lint && npm run build && npm run test && npm run docs && npm run dts",
     "test": "./node_modules/.bin/jest --forceExit --detectOpenHandles",
     "testSync": "./node_modules/.bin/jest --runInBand --forceExit --detectOpenHandles",
     "lint": "./node_modules/.bin/tslint -c ./tslint.json -p ./tsconfig.json -t stylish ./lib/**/*.ts",
     "build": "./node_modules/.bin/webpack",
     "buildDev": "./node_modules/.bin/webpack --config webpack.config.dev.js",
     "docs": "./node_modules/.bin/typedoc --module commonjs --target ES6 --exclude **/*.test.* --ignoreCompilerErrors --out ./docs --readme ./README.md --mode file ./index.ts ./lib",
-    "exec": "node ./dist/index.js -r . generate"
+    "dts": "npm run exec",
+    "exec": "node ./cli.js generate"
   },
   "homepage": "https://github.com/vytenisu/npm-dts",
   "bugs": {

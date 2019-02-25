@@ -6,7 +6,9 @@ This utility generates single index.d.ts file for whole NPM package.
 
 It allows creating NPM library packages without TypeScript sources and yet still keeping code suggestions wherever these libraries are imported. Typescript picks up index.d.ts automatically.
 
-# Installation
+---
+
+## Installation
 
 Local:
 
@@ -20,24 +22,35 @@ Global:
 npm install -g npm-dts
 ```
 
-# Usage
+---
 
-Please make sure that target project has "typescript" installed (in _node_modules_).
+## CLI Usage
 
-**To see full _CLI_ help, run without arguments:**
+Please make sure that target project has "typescript" installed in _node_modules_.
+
+### To see full _CLI_ help - run without arguments:
 
 ```
 npm-dts
 ```
 
-**Typical usage (global install):**
+### Typical usage (global install):
 
 ```
 cd /your/project
 npm-dts generate
 ```
 
-**Integration into package.json (local install):**
+### Additional supported configuration:
+
+- **-e** - change main src file from index.ts to something else
+- **-r** - root of your project containing project.json
+- **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished.
+- **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability.
+
+## Simple automation
+
+Example of how you could run dts generation automatically before every publish.
 
 ```
 {
@@ -50,13 +63,55 @@ npm-dts generate
 }
 ```
 
-**Additional supported configuration:**
+Another possible option would be to execute "npm run dts" as part of bundling task.
 
-- **-e** - change main src file from index.ts to something else
-- **-r** - root of your project containing project.json
-- **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished.
-- **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability.
+### Integration into code
 
-# Contribution
+This approach can be used for integration with tools such as _WebPack_.
+
+Simple usage with all default values:
+
+```
+import { Generator } from 'npm-dts'
+new Generator().generate({})
+```
+
+Advanced usage example with all arguments overridden:
+
+```
+import * as path from 'path'
+import { Generator } from 'npm-dts'
+
+new Generator().generate({
+  entry: 'main.ts',
+  root: path.resolve(process.cwd(), 'project'),
+  tmp: path.resolve(process.cwd(), 'cache/tmp'),
+  tsc: '--extendedDiagnostics',
+})
+```
+
+Above examples were in TypeScript. Same in plain JavaScript would look like this:
+
+```
+const path = require('path')
+
+new (require('npm-dts').Generator)({
+  entry: 'main.ts',
+  root: path.resolve(process.cwd(), 'project'),
+  tmp: path.resolve(process.cwd(), 'cache/tmp'),
+  tsc: '--extendedDiagnostics'
+}).generate()
+```
+
+Constructor of generator also supports two more boolean flags as optional arguments:
+
+- Enable log
+- Throw exception on error
+
+Initializing without any options will cause _npm-cli_ to read CLI arguments by itself.
+
+---
+
+## Contribution
 
 Contribution is welcome in a form of pull requests and issues.
