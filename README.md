@@ -50,6 +50,10 @@ npm-dts generate
 - **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished.
 - **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability.
 
+## Integration into WebPack
+
+You would want to use "npm-dts-webpack-plugin" package instead.
+
 ## Integration into NPM scripts
 
 Example of how you could run dts generation automatically before every publish.
@@ -67,7 +71,7 @@ Example of how you could run dts generation automatically before every publish.
 
 Another possible option would be to execute "npm run dts" as part of bundling task.
 
-## Integration into code
+## Integration into custom solution
 
 This approach can be used for integration with tools such as _WebPack_.
 
