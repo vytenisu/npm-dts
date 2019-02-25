@@ -128,8 +128,12 @@ export class Cli {
           this.storeArguments(options)
         })
         .example(
-          'npm-dts -r . generate',
+          'npm-dts generate',
           'Generates index.d.ts file and updates package.json for CWD.',
+        )
+        .example(
+          'npm-dts -r /your/project/path generate',
+          'Performs generation on a custom path.',
         )
 
       args.parse(process.argv, {
