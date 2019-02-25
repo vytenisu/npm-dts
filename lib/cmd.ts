@@ -67,7 +67,7 @@ export class Cli {
       )
       .option(
         ['t', 'tmp'],
-        'Directory used for storing temporary information during generation',
+        'Directory for storing temporary information',
         this.args.tmp,
       )
       .option(
@@ -76,7 +76,7 @@ export class Cli {
         this.args.tsc,
       )
       .option(
-        ['t', 'testMode'],
+        ['m', 'testMode'],
         'Configures npm-dts for self-test',
         this.args.testMode,
       )

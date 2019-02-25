@@ -23,7 +23,7 @@ describe('Default behavior', () => {
       // NOT NEEDED
     }
 
-    exec(`node "${scriptPath}" -t -r "${projectPath}" generate`)
+    exec(`node "${scriptPath}" -m -r "${projectPath}" generate`)
     source = readFileSync(dtsPath, {encoding: 'utf8'})
   })
 
