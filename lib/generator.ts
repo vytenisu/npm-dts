@@ -74,7 +74,7 @@ export class Generator extends Cli {
     verbose('Starting generation...')
 
     await this.generateTypings()
-    let source = this.combineTypings()
+    let source = await this.combineTypings()
     source = this.addAlias(source)
     this.storeResult(source)
 
@@ -398,9 +398,9 @@ export class Generator extends Cli {
   /**
    * Combines typings into a single declaration source
    */
-  private combineTypings() {
+  private async combineTypings() {
     const typings = this.loadTypings()
-    this.clearTempDir()
+    await this.clearTempDir()
 
     this.moduleNames = Object.keys(typings)
 
