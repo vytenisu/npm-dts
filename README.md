@@ -4,9 +4,9 @@ _by Vytenis Urbonavičius_
 
 This utility generates single _index.d.ts_ file for whole NPM package.
 
-It allows creating NPM library packages without TypeScript sources and yet still keeping code suggestions wherever these libraries are imported.
+It allows creating NPM library packages without _TypeScript_ sources and yet still keeping code suggestions wherever these libraries are imported.
 
-Typescript picks up _index.d.ts_ automatically.
+_Typescript_ picks up _index.d.ts_ automatically.
 
 ---
 
@@ -92,7 +92,7 @@ new Generator().generate({
 })
 ```
 
-Above examples were in TypeScript. Same in plain JavaScript would look like this:
+Above examples were in _TypeScript_. Same in plain _JavaScript_ would look like this:
 
 ```
 const path = require('path')
