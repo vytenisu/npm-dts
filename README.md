@@ -2,7 +2,7 @@
 
 _by Vytenis Urbonavičius_
 
-This utility generates single index.d.ts file for whole NPM package.
+This utility generates single _index.d.ts_ file for whole NPM package.
 
 It allows creating NPM library packages without TypeScript sources and yet still keeping code suggestions wherever these libraries are imported.
 
@@ -36,7 +36,7 @@ To see full _CLI_ help - run without arguments:
 npm-dts
 ```
 
-Typical usage (global install):
+Typical usage (using global install):
 
 ```
 cd /your/project
@@ -45,7 +45,7 @@ npm-dts generate
 
 #### Additional supported configuration:
 
-- **-e** - change main src file from index.ts to something else
+- **-e** - change main _src_ file from _index.ts_ to something else
 - **-r** - root of your project containing project.json
 - **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished.
 - **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability.
