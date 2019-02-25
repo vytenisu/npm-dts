@@ -4,7 +4,9 @@ _by Vytenis Urbonavičius_
 
 This utility generates single index.d.ts file for whole NPM package.
 
-It allows creating NPM library packages without TypeScript sources and yet still keeping code suggestions wherever these libraries are imported. Typescript picks up index.d.ts automatically.
+It allows creating NPM library packages without TypeScript sources and yet still keeping code suggestions wherever these libraries are imported.
+
+Typescript picks up _index.d.ts_ automatically.
 
 ---
 
@@ -28,27 +30,27 @@ npm install -g npm-dts
 
 Please make sure that target project has "typescript" installed in _node_modules_.
 
-### To see full _CLI_ help - run without arguments:
+To see full _CLI_ help - run without arguments:
 
 ```
 npm-dts
 ```
 
-### Typical usage (global install):
+Typical usage (global install):
 
 ```
 cd /your/project
 npm-dts generate
 ```
 
-### Additional supported configuration:
+#### Additional supported configuration:
 
 - **-e** - change main src file from index.ts to something else
 - **-r** - root of your project containing project.json
 - **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished.
 - **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability.
 
-## Simple automation
+## Integration into NPM scripts
 
 Example of how you could run dts generation automatically before every publish.
 
@@ -65,7 +67,7 @@ Example of how you could run dts generation automatically before every publish.
 
 Another possible option would be to execute "npm run dts" as part of bundling task.
 
-### Integration into code
+## Integration into code
 
 This approach can be used for integration with tools such as _WebPack_.
 
@@ -102,6 +104,8 @@ new (require('npm-dts').Generator)({
   tsc: '--extendedDiagnostics'
 }).generate()
 ```
+
+### Additional arguments
 
 Constructor of generator also supports two more boolean flags as optional arguments:
 
