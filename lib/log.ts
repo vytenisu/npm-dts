@@ -18,6 +18,36 @@ winston.addColors({
 let logEnabled = false
 
 /**
+ * Supported debug levels
+ */
+export enum ELogLevel {
+  /**
+   * Error
+   */
+  error = 'error',
+
+  /**
+   * Warning
+   */
+  warn = 'warn',
+
+  /**
+   * Information
+   */
+  info = 'info',
+
+  /**
+   * Verbose information
+   */
+  verbose = 'verbose',
+
+  /**
+   * Debug information
+   */
+  debug = 'debug',
+}
+
+/**
  * Logs error message
  * @param message Message to be logged
  */
@@ -78,24 +108,12 @@ export const debug = (message: string) => {
 }
 
 /**
- * Logs message of little importance
- * @param message Message to be logged
- */
-export const silly = (message: string) => {
-  if (logEnabled) {
-    return winstonSilly(message)
-  } else {
-    return null
-  }
-}
-
-/**
  * Initializes and enables logging
  * @param label prefix to be used before each log line
  */
-export const init = (label: string) => {
+export const init = (label: string, level: ELogLevel) => {
   winston.configure({
-    level: 'verbose',
+    level,
     format: winston.format.combine(
       winston.format.colorize(),
       winston.format.label({label}),

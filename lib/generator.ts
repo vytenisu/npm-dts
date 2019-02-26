@@ -4,8 +4,9 @@ import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
 import {join, relative, resolve} from 'path'
 import * as rm from 'rimraf'
+import * as tmp from 'tmp'
 import {Cli, ECliArgument, INpmDtsArgs} from './cli'
-import {debug, error, init, verbose} from './log'
+import {debug, ELogLevel, error, info, init, verbose} from './log'
 
 const MKDIR_RETRIES = 5
 
@@ -37,7 +38,31 @@ export class Generator extends Cli {
     }
 
     if (enableLog) {
-      init('npm-dts')
+      init('npm-dts', this.getLogLevel())
+
+      const myPackageJson = JSON.parse(
+        readFileSync(resolve(__dirname, '..', 'package.json'), {
+          encoding: 'utf8',
+        }),
+      )
+
+      const soft = `          npm-dts v${myPackageJson.version}                `
+      let author = '          by Vytenis Urbonavičius                          '
+      let spaces = '                                                           '
+      let border = '___________________________________________________________'
+
+      author = author.substring(0, soft.length)
+      spaces = spaces.substring(0, soft.length)
+      border = border.substring(0, soft.length)
+
+      info(` ${border} `)
+      info(`|${spaces}|`)
+      info(`|${spaces}|`)
+      info(`|${soft}|`)
+      info(`|${author}|`)
+      info(`|${spaces}|`)
+      info(`|${border}|`)
+      info(` ${spaces} `)
     }
   }
 
@@ -45,16 +70,65 @@ export class Generator extends Cli {
    * Executes generation of single declaration file
    */
   public async generate() {
-    await this._generate().catch(e => {
-      error('Generation of index.d.ts has failed!')
+    info('Generating declarations...')
 
-      if (e) {
-        debug(`Error: ${JSON.stringify(e)}`)
+    let hasError = false
+    const cleanupTasks: Array<() => void> = []
+
+    if (!this.tmpPassed) {
+      verbose('Locating OS Temporary Directory...')
+
+      try {
+        await new Promise(done => {
+          tmp.dir((tmpErr, tmpDir, rmTmp) => {
+            if (tmpErr) {
+              error('Could not create OS Temporary Directory!')
+              this.showDebugError(tmpErr)
+              throw tmpErr
+            }
+
+            verbose('OS Temporary Directory was located!')
+            this.setArgument(ECliArgument.tmp, resolve(tmpDir, 'npm-dts'))
+
+            cleanupTasks.push(() => {
+              verbose('Clearing OS Temporary Directory...')
+              rmTmp()
+              verbose('Cleared OS Temporary Directory!')
+            })
+            done()
+          })
+        })
+      } catch (e) {
+        hasError = true
+
         if (this.throwErrors) {
+          cleanupTasks.forEach(task => task())
           throw e
         }
       }
-    })
+    }
+
+    if (!hasError) {
+      await this._generate().catch(e => {
+        hasError = true
+
+        error('Generation of index.d.ts has failed!')
+        this.showDebugError(e)
+
+        if (this.throwErrors) {
+          cleanupTasks.forEach(task => task())
+          throw e
+        }
+      })
+    }
+
+    cleanupTasks.forEach(task => task())
+
+    if (!hasError) {
+      info('Generation is completed!')
+    } else {
+      error('Generation failed!')
+    }
   }
 
   /**
@@ -63,7 +137,11 @@ export class Generator extends Cli {
    */
   private showDebugError(e: any) {
     if (e) {
-      debug(`Error: ${JSON.stringify(e)}`)
+      if (e.stdout) {
+        debug(`Error: \n${e.stdout.toString()}`)
+      } else {
+        debug(`Error: \n${JSON.stringify(e)}`)
+      }
     }
   }
 
@@ -71,14 +149,15 @@ export class Generator extends Cli {
    * Launches generation of typings
    */
   private async _generate() {
-    verbose('Starting generation...')
-
     await this.generateTypings()
     let source = await this.combineTypings()
     source = this.addAlias(source)
     this.storeResult(source)
+  }
 
-    verbose('Generation is completed!')
+  private getLogLevel(): ELogLevel {
+    const logLevel = this.getArgument(ECliArgument.logLevel) as string
+    return ELogLevel[logLevel as any] ? (logLevel as ELogLevel) : ELogLevel.info
   }
 
   /**
@@ -186,8 +265,9 @@ export class Generator extends Cli {
     const tscOptions = this.getArgument(ECliArgument.tsc) as string
 
     const cmd =
-      'tsc --declaration --emitDeclarationOnly --declarationDir ' +
+      'tsc --declaration --emitDeclarationOnly --declarationDir "' +
       this.getTempDir() +
+      '"' +
       (tscOptions.length ? ` ${tscOptions}` : '')
 
     debug(cmd)
@@ -201,14 +281,14 @@ export class Generator extends Cli {
         if (err) {
           error('Failed to generate typings using TSC!')
           this.showDebugError(err)
-        }
+        } else {
+          if (stdout) {
+            process.stdout.write(stdout)
+          }
 
-        if (stdout) {
-          process.stdout.write(stdout)
-        }
-
-        if (stderr) {
-          process.stderr.write(stderr)
+          if (stderr) {
+            process.stderr.write(stderr)
+          }
         }
       },
     )

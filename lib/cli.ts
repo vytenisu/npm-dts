@@ -1,5 +1,6 @@
 import * as args from 'args'
 import * as path from 'path'
+import {ELogLevel} from './log'
 
 /**
  * CLI argument names
@@ -24,6 +25,11 @@ export enum ECliArgument {
    * Additional TSC properties
    */
   tsc = 'tsc',
+
+  /**
+   * Selected logging level
+   */
+  logLevel = 'logLevel',
 
   /**
    * Flag which forces using own TSC as opposed to target TSC
@@ -63,6 +69,11 @@ export interface INpmDtsArgs {
   tsc?: string
 
   /**
+   * Selected logging level
+   */
+  logLevel?: ELogLevel
+
+  /**
    * Flag which forces using own TSC as opposed to target TSC
    * This should only be used for testing npm-dts itself
    * This is because it generates incorrect module names
@@ -80,13 +91,19 @@ export class Cli {
   protected launched = false
 
   /**
+   * Stores whether TMP directory location was passed
+   */
+  protected tmpPassed = false
+
+  /**
    * Stores current CLI argument values
    */
   private args: INpmDtsArgs = {
     entry: 'index.ts',
     root: path.resolve(process.cwd()),
-    tmp: path.resolve(process.cwd(), 'tmp'),
+    tmp: '<TEMP>',
     tsc: '',
+    logLevel: ELogLevel.info,
     testMode: false,
   }
 
@@ -112,11 +129,23 @@ export class Cli {
           ['t', 'tmp'],
           'Directory for storing temporary information',
           this.args.tmp,
+          (value: string) => {
+            if (!value.includes('<')) {
+              this.tmpPassed = true
+            }
+
+            return value
+          },
         )
         .option(
           ['c', 'tsc'],
           'Passed through non-validated additional TSC options',
           this.args.tsc,
+        )
+        .option(
+          ['L', 'logLevel'],
+          'Log level (error, warn, info, verbose, debug)',
+          this.args.logLevel,
         )
         .option(
           ['m', 'testMode'],
@@ -155,6 +184,15 @@ export class Cli {
    */
   protected getArgument(arg: ECliArgument) {
     return this.args[arg]
+  }
+
+  /**
+   * Dynamically overrides value of stored argument
+   * @param arg argument name
+   * @param value argument value
+   */
+  protected setArgument(arg: ECliArgument, value: string | boolean) {
+    this.args[arg] = value
   }
 
   /**

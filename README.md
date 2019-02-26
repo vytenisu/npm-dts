@@ -48,7 +48,8 @@ npm-dts generate
 - **-e** - change main _src_ file from _index.ts_ to something else
 - **-r** - root of your project containing project.json
 - **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished.
-- **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability.
+- **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes and start with space inside. Value without space in some cases may be treated as invalid argument for _npm-dts_ itself.
+- **-L** - sets log level (error, warn, info, verbose, debug)
 
 ## Integration into WebPack
 
