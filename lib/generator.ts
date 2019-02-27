@@ -17,6 +17,7 @@ export class Generator extends Cli {
   private packageInfo: any
   private moduleNames: string[]
   private throwErrors: boolean
+  private cacheContentEmptied: boolean = true
 
   /**
    * Auto-launches generation based on command line arguments
@@ -70,7 +71,7 @@ export class Generator extends Cli {
    * Executes generation of single declaration file
    */
   public async generate() {
-    info('Generating declarations...')
+    info(`Generating declarations for "${this.getRoot()}"...`)
 
     let hasError = false
     const cleanupTasks: Array<() => void> = []
@@ -91,9 +92,9 @@ export class Generator extends Cli {
             this.setArgument(ECliArgument.tmp, resolve(tmpDir, 'npm-dts'))
 
             cleanupTasks.push(() => {
-              verbose('Clearing OS Temporary Directory...')
+              verbose('Deleting OS Temporary Directory...')
               rmTmp()
-              verbose('Cleared OS Temporary Directory!')
+              verbose('OS Temporary Directory was deleted!')
             })
             done()
           })
@@ -109,11 +110,15 @@ export class Generator extends Cli {
     }
 
     if (!hasError) {
-      await this._generate().catch(e => {
+      await this._generate().catch(async e => {
         hasError = true
 
         error('Generation of index.d.ts has failed!')
         this.showDebugError(e)
+
+        if (!this.cacheContentEmptied) {
+          await this.clearTempDir()
+        }
 
         if (this.throwErrors) {
           cleanupTasks.forEach(task => task())
@@ -194,27 +199,28 @@ export class Generator extends Cli {
    */
   private makeTempDir(retries = MKDIR_RETRIES) {
     const tmpDir = this.getTempDir()
-    verbose(`Creating tmp directory at ${tmpDir}...`)
+    verbose('Preparing "tmp" directory...')
 
     return new Promise((done, fail) => {
       mkdir(tmpDir, (mkdirError: any) => {
         if (mkdirError) {
-          error('Failed to create tmp directory!')
+          error(`Failed to create "${tmpDir}"!`)
           this.showDebugError(mkdirError)
 
           if (retries) {
             const sleepTime = 100
-            verbose(`Will retry tmp directory creation in ${sleepTime}ms...`)
+            verbose(`Will retry in ${sleepTime}ms...`)
 
             setTimeout(() => {
               this.makeTempDir(retries - 1).then(done, fail)
             }, sleepTime)
           } else {
-            error(`Stopped trying after ${MKDIR_RETRIES} retries`)
+            error(`Stopped trying after ${MKDIR_RETRIES} retries!`)
             fail()
           }
         } else {
-          verbose('Tmp directory was successfully created!')
+          this.cacheContentEmptied = false
+          verbose('"tmp" directory was prepared!')
           done()
         }
       })
@@ -226,16 +232,17 @@ export class Generator extends Cli {
    */
   private clearTempDir() {
     const tmpDir = this.getTempDir()
-    verbose(`Clearing tmp directory at ${tmpDir}...`)
+    verbose('Cleaning up "tmp" directory...')
 
     return new Promise((done, fail) => {
       rm(tmpDir, rmError => {
         if (rmError) {
-          error('Could not clear tmp directory!')
+          error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
           this.showDebugError(rmError)
           fail()
         } else {
-          verbose('Tmp directory was cleared!')
+          this.cacheContentEmptied = true
+          verbose('"tmp" directory was cleaned!')
           done()
         }
       })
@@ -246,7 +253,7 @@ export class Generator extends Cli {
    * Re-creates empty TMP directory to be used for TSC operations
    */
   private resetCacheDir() {
-    verbose('Will now reset tmp directory...')
+    verbose('Will now reset "tmp" directory...')
     return new Promise((done, fail) => {
       this.clearTempDir().then(() => {
         this.makeTempDir().then(done, fail)
@@ -348,7 +355,7 @@ export class Generator extends Cli {
         readFileSync(packageJsonPath, {encoding: 'utf8'}),
       )
     } catch (e) {
-      error(`Failed to read package.json at '${packageJsonPath}'`)
+      error(`Failed to read package.json at "'${packageJsonPath}'"`)
       this.showDebugError(e)
       throw e
     }

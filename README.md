@@ -43,21 +43,21 @@ cd /your/project
 npm-dts generate
 ```
 
-#### Additional supported configuration:
+Additional supported configuration:
 
-- **-e** - change main _src_ file from _index.ts_ to something else
-- **-r** - root of your project containing project.json
-- **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished.
+- **-e** - change main _src_ file from _index.ts_ to something else.
+- **-r** - root of your project containing _project.json_.
+- **-t** - set tmp directory - used for storing some files during generation. Note that tool completely deletes this folder once finished. Default is OS temporary directory.
 - **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes and start with space inside. Value without space in some cases may be treated as invalid argument for _npm-dts_ itself.
-- **-L** - sets log level (error, warn, info, verbose, debug)
+- **-L** - sets log level (_error_, _warn_, _info_, _verbose_, _debug_). Default is _info_.
 
 ## Integration into WebPack
 
-You would want to use "npm-dts-webpack-plugin" package instead.
+You would want to use **"npm-dts-webpack-plugin"** package instead.
 
 ## Integration into NPM scripts
 
-Example of how you could run dts generation automatically before every publish.
+Example of how you could run generation of _index.d.ts_ automatically before every publish.
 
 ```
 {
@@ -83,7 +83,7 @@ import { Generator } from 'npm-dts'
 new Generator().generate({})
 ```
 
-Advanced usage example with all arguments overridden:
+Advanced usage example with some arguments overridden:
 
 ```
 import * as path from 'path'
@@ -118,9 +118,3 @@ Constructor of generator also supports two more boolean flags as optional argume
 - Throw exception on error
 
 Initializing without any options will cause _npm-cli_ to read CLI arguments by itself.
-
----
-
-## Contribution
-
-Contribution is welcome in a form of pull requests and issues.
