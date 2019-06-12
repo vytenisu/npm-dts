@@ -1,6 +1,6 @@
 {
   "name": "npm-dts",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Simple DTS single-file generation utility for TypeScript bundles",
   "main": "dist/index.js",
   "bin": {
@@ -54,31 +54,30 @@
   "license": "MIT",
   "devDependencies": {
     "@types/args": "3.0.0",
-    "@types/jest": "23.3.14",
+    "@types/jest": "24.0.13",
     "@types/mkdirp": "0.5.2",
     "@types/rimraf": "2.0.2",
-    "@types/tmp": "0.0.34",
+    "@types/tmp": "0.1.0",
     "@types/winston": "2.4.4",
-    "find-node-modules": "1.0.4",
-    "jest": "23.6.0",
+    "find-node-modules": "2.0.0",
+    "jest": "24.8.0",
     "license-webpack-plugin": "2.1.1",
-    "string-replace-webpack-plugin": "0.1.3",
-    "ts-jest": "23.10.5",
-    "ts-loader": "5.3.3",
-    "ts-node": "8.0.2",
-    "tslint": "5.12.1",
+    "ts-jest": "24.0.2",
+    "ts-loader": "6.0.2",
+    "ts-node": "8.2.0",
+    "tslint": "5.17.0",
     "typedoc": "0.14.2",
-    "typescript": "3.3.3",
-    "webpack": "4.29.4",
-    "webpack-cli": "3.2.3",
+    "typescript": "3.5.1",
+    "webpack": "4.33.0",
+    "webpack-cli": "3.3.4",
     "webpack-node-externals": "1.7.2"
   },
   "dependencies": {
-    "args": "5.0.0",
+    "args": "5.0.1",
     "mkdirp": "0.5.1",
     "npm-run": "5.0.1",
     "rimraf": "2.6.3",
-    "tmp": "0.0.33",
+    "tmp": "0.1.0",
     "winston": "3.2.1"
   }
 }

@@ -1,6 +1,5 @@
 const webpack = require('webpack')
 const nodeExternals = require('webpack-node-externals')
-const StringReplacePlugin = require('string-replace-webpack-plugin')
 const LicenseWebpackPlugin = require('license-webpack-plugin')
   .LicenseWebpackPlugin
 
@@ -40,33 +39,6 @@ const exportedConfig = {
               configFile: __dirname + '/tsconfig.json',
             },
           },
-          StringReplacePlugin.replace({
-            replacements: [
-              {
-                pattern: /^\s*(import .* as ([a-zA-Z0-9_-]+) from .*((\.css)|(\.less)).*$)/gm,
-                replacement: function(
-                  match,
-                  p1,
-                  p2,
-                  p3,
-                  p4,
-                  p5,
-                  offset,
-                  string,
-                ) {
-                  let result =
-                    p1 +
-                    '	/* Generated forced initialization (only dev mode): */ ;' +
-                    'let ' +
-                    p2 +
-                    '_forceInit = ' +
-                    p2 +
-                    ';'
-                  return result
-                },
-              },
-            ],
-          }),
         ],
       },
     ],

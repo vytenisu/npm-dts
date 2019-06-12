@@ -1,21 +1,4 @@
 {
-  "files.exclude": {
-    "docs": true,
-    "cache": true,
-    "**/.vscode": true,
-    ".git": true,
-    "index.d.ts": true,
-    ".gitignore": true,
-    "package-lock.json": true,
-    "jest.config.js": true,
-    "tsconfig.json": true,
-    "tslint.json": true,
-    "webpack.config.js": true,
-    "webpack.config.dev.js": true,
-    "scripts": true,
-    "node_modules": true,
-    "dist": true
-  },
   "todohighlight.keywords": [
     {
       "text": "TODO:",

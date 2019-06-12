@@ -192,6 +192,7 @@ export class Cli {
    * @param value argument value
    */
   protected setArgument(arg: ECliArgument, value: string | boolean) {
+    // @ts-ignore
     this.args[arg] = value
   }
 
