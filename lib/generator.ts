@@ -390,7 +390,7 @@ export class Generator extends Cli {
     }
 
     path = path.replace(/\\/g, '/')
-    path = path.replace(/\..+$/g, '')
+    path = path.replace(/\.[^.]+$/g, '')
     path = path.replace(/\.d$/g, '')
 
     return path

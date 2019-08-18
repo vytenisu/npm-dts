@@ -48,7 +48,7 @@ describe('Default behavior', () => {
   })
 
   it('exports all interfaces', () => {
-    const interfaces = ['ISuggestedText']
+    const interfaces = ['ISuggestedText', 'ASchema']
 
     interfaces.forEach(int => {
       expect(source.includes(`export interface ${int}`)).toBeTruthy()
