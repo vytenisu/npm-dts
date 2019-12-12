@@ -5,6 +5,7 @@ import * as path from 'path'
 describe('Default behavior', () => {
   const scriptPath = path.resolve(__dirname, '..', '..', 'cli.js')
   const projectPath = path.resolve(__dirname, '..', 'sources', 'default')
+  const jsProjectPath = path.resolve(__dirname, '..', 'sources', 'js')
 
   const dtsPath = path.resolve(
     __dirname,
@@ -14,7 +15,10 @@ describe('Default behavior', () => {
     'index.d.ts',
   )
 
+  const jsDtsPath = path.resolve(__dirname, '..', 'sources', 'js', 'index.d.ts')
+
   let source: string
+  let jsSource: string
 
   beforeAll(() => {
     try {
@@ -23,19 +27,36 @@ describe('Default behavior', () => {
       // NOT NEEDED
     }
 
-    exec(`node "${scriptPath}" -m -r "${projectPath}" generate`)
+    exec(
+      `node "${scriptPath}" -m -r "${projectPath}" -c " -p tsconfig.test.json" generate`,
+    )
+
+    exec(
+      `node "${scriptPath}" -m -r "${jsProjectPath}" -c " -p tsconfig.test.json" generate`,
+    )
+
     source = readFileSync(dtsPath, {encoding: 'utf8'})
+    jsSource = readFileSync(jsDtsPath, {encoding: 'utf8'})
   })
 
   afterAll(() => {
     unlinkSync(dtsPath)
+    unlinkSync(jsDtsPath)
   })
 
-  it('exports all classes', () => {
+  it('exports all TS classes', () => {
     const classes = ['A', 'B', 'C']
 
     classes.forEach(cls => {
       expect(source.includes(`export class ${cls}`)).toBeTruthy()
+    })
+  })
+
+  it('exports all JS classes', () => {
+    const classes = ['XXX', 'YYY']
+
+    classes.forEach(cls => {
+      expect(jsSource.includes(`export class ${cls}`)).toBeTruthy()
     })
   })
 
@@ -57,7 +78,9 @@ describe('Default behavior', () => {
 
   it('does not leave relative paths', () => {
     expect(source.includes('from \'.')).toBeFalsy()
+    expect(jsSource.includes('from \'.')).toBeFalsy()
     expect(source.includes('import(\'.')).toBeFalsy()
+    expect(jsSource.includes('import(\'.')).toBeFalsy()
   })
 
   it('does not touch 3rd party module imports', () => {
@@ -65,8 +88,14 @@ describe('Default behavior', () => {
   })
 
   it('works correctly when index.ts is used', () => {
-    expect(source.includes('from \'test-default/src/c/index\''))
-    expect(source.includes('declare module \'test-default/src/c/index\''))
+    expect(
+      source.includes('from \'test-default/test/sources/default/src/c/index\''),
+    ).toBeTruthy()
+    expect(
+      source.includes(
+        'declare module \'test-default/test/sources/default/src/c/index\'',
+      ),
+    ).toBeTruthy()
   })
 
   it('works correctly when index.ts is not used', () => {
@@ -89,5 +118,18 @@ describe('Default behavior', () => {
 
   it('exports main NPM package module', () => {
     expect(source.includes('declare module \'test-default\'')).toBeTruthy()
+    expect(jsSource.includes('declare module \'test-js\'')).toBeTruthy()
+  })
+
+  it('exports entry point under module name', () => {
+    expect(source.includes('require(\'test-default/index\')')).toBeTruthy()
+    expect(jsSource.includes('require(\'test-js/index\')')).toBeTruthy()
+  })
+
+  it('re-exports JS modules', () => {
+    const modules = ['XXX', 'YYY']
+    modules.forEach(m => {
+      expect(jsSource.includes(`export var ${m}`)).toBeTruthy()
+    })
   })
 })
