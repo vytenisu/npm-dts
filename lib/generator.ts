@@ -161,8 +161,8 @@ export class Generator extends Cli {
   }
 
   private getLogLevel(): ELogLevel {
-    const logLevel = this.getArgument(ECliArgument.logLevel) as string
-    return ELogLevel[logLevel as any] ? (logLevel as ELogLevel) : ELogLevel.info
+    const logLevel = this.getArgument(ECliArgument.logLevel) as ELogLevel
+    return ELogLevel[logLevel] ? logLevel : ELogLevel.info
   }
 
   /**

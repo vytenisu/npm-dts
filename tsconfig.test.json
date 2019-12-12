@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
     "target": "ES5",
+    "moduleResolution": "node",
     "lib": ["es2015", "es2017", "dom"],
     "sourceMap": true,
     "skipLibCheck": true,
@@ -8,14 +11,20 @@
     "noImplicitUseStrict": true,
     "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["./**/*.ts"],
+  "include": ["./**/*.ts", "./**/*.js"],
   "exclude": [
-    "test",
     "**/*.test.ts",
+    "jest.config.js",
+    "cli.js",
+    "docs",
+    "dist",
     "node_modules",
     "bower_components",
     "cache",
     "build",
-    "static"
+    "static",
+    "scripts",
+    "webpack.config.dev.js",
+    "webpack.config.js"
   ]
 }
