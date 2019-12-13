@@ -37,6 +37,11 @@ export enum ECliArgument {
    * This is because it generates incorrect module names
    */
   testMode = 'testMode',
+
+  /**
+   * Flag which forces attempting generation at least partially despite errors
+   */
+  force = 'force',
 }
 
 /**
@@ -74,6 +79,11 @@ export interface INpmDtsArgs {
   logLevel?: ELogLevel
 
   /**
+   * Attempts to at least partially generate typings ignoring non-critical errors
+   */
+  force?: boolean
+
+  /**
    * Flag which forces using own TSC as opposed to target TSC
    * This should only be used for testing npm-dts itself
    * This is because it generates incorrect module names
@@ -104,6 +114,7 @@ export class Cli {
     tmp: '<TEMP>',
     tsc: '',
     logLevel: ELogLevel.info,
+    force: false,
     testMode: false,
   }
 
@@ -146,6 +157,11 @@ export class Cli {
           ['L', 'logLevel'],
           'Log level (error, warn, info, verbose, debug)',
           this.args.logLevel,
+        )
+        .option(
+          ['f', 'force'],
+          'Ignores non-critical errors and attempts to at least partially generate typings',
+          this.args.force,
         )
         .option(
           ['m', 'testMode'],

@@ -6,7 +6,7 @@ import {join, relative, resolve} from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
 import {Cli, ECliArgument, INpmDtsArgs} from './cli'
-import {debug, ELogLevel, error, info, init, verbose} from './log'
+import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
 
 const MKDIR_RETRIES = 5
 
@@ -116,6 +116,22 @@ export class Generator extends Cli {
         error('Generation of index.d.ts has failed!')
         this.showDebugError(e)
 
+        if (!this.useForce()) {
+          if (this.getLogLevel() === ELogLevel.debug) {
+            info(
+              'If issue is not severe, you can try forcing execution using force flag.',
+            )
+            info(
+              'In case of command line usage, add "-f" as the first parameter.',
+            )
+          } else {
+            info('You should try running npm-dts with debug level logging.')
+            info(
+              'In case of command line, debug mode is enabled using "-L debug".',
+            )
+          }
+        }
+
         if (!this.cacheContentEmptied) {
           await this.clearTempDir()
         }
@@ -191,6 +207,13 @@ export class Generator extends Cli {
    */
   private useTestMode(): boolean {
     return this.getArgument(ECliArgument.testMode) as boolean
+  }
+
+  /**
+   * Checks if script is forced to attempt generation despite errors
+   */
+  private useForce(): boolean {
+    return this.getArgument(ECliArgument.force) as boolean
   }
 
   /**
@@ -279,26 +302,41 @@ export class Generator extends Cli {
 
     debug(cmd)
 
-    npmRun.execSync(
-      cmd,
-      {
-        cwd: this.useTestMode() ? resolve(__dirname, '..') : this.getRoot(),
-      },
-      (err: any, stdout: any, stderr: any) => {
-        if (err) {
-          error('Failed to generate typings using TSC!')
-          this.showDebugError(err)
-        } else {
-          if (stdout) {
-            process.stdout.write(stdout)
-          }
+    try {
+      npmRun.execSync(
+        cmd,
+        {
+          cwd: this.useTestMode() ? resolve(__dirname, '..') : this.getRoot(),
+        },
+        (err: any, stdout: any, stderr: any) => {
+          if (err) {
+            if (this.useForce()) {
+              warn('TSC exited with errors!')
+            } else {
+              error('TSC exited with errors!')
+            }
 
-          if (stderr) {
-            process.stderr.write(stderr)
+            this.showDebugError(err)
+          } else {
+            if (stdout) {
+              process.stdout.write(stdout)
+            }
+
+            if (stderr) {
+              process.stderr.write(stderr)
+            }
           }
-        }
-      },
-    )
+        },
+      )
+    } catch (e) {
+      if (this.useForce()) {
+        warn('Suppressing errors due to "force" flag!')
+        this.showDebugError(e)
+        warn('Generated declaration files might not be valid!')
+      } else {
+        throw e
+      }
+    }
 
     verbose('Per-file typings have been generated using TSC!')
   }
