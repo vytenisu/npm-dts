@@ -74,7 +74,7 @@ export class Generator extends Cli {
     info(`Generating declarations for "${this.getRoot()}"...`)
 
     let hasError = false
-    const cleanupTasks: Array<() => void> = []
+    const cleanupTasks: (() => void)[] = []
 
     if (!this.tmpPassed) {
       verbose('Locating OS Temporary Directory...')
@@ -225,8 +225,13 @@ export class Generator extends Cli {
     verbose('Preparing "tmp" directory...')
 
     return new Promise((done, fail) => {
-      mkdir(tmpDir, (mkdirError: any) => {
-        if (mkdirError) {
+      mkdir(tmpDir)
+        .then(() => {
+          this.cacheContentEmptied = false
+          verbose('"tmp" directory was prepared!')
+          done()
+        })
+        .catch(mkdirError => {
           error(`Failed to create "${tmpDir}"!`)
           this.showDebugError(mkdirError)
 
@@ -241,12 +246,7 @@ export class Generator extends Cli {
             error(`Stopped trying after ${MKDIR_RETRIES} retries!`)
             fail()
           }
-        } else {
-          this.cacheContentEmptied = false
-          verbose('"tmp" directory was prepared!')
-          done()
-        }
-      })
+        })
     })
   }
 

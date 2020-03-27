@@ -81,7 +81,7 @@ Simple usage with all default values:
 
 ```
 import { Generator } from 'npm-dts'
-new Generator().generate({})
+new Generator({}).generate()
 ```
 
 Advanced usage example with some arguments overridden:
@@ -90,12 +90,12 @@ Advanced usage example with some arguments overridden:
 import * as path from 'path'
 import { Generator } from 'npm-dts'
 
-new Generator().generate({
+new Generator({
   entry: 'main.ts',
   root: path.resolve(process.cwd(), 'project'),
   tmp: path.resolve(process.cwd(), 'cache/tmp'),
   tsc: '--extendedDiagnostics',
-})
+}).generate()
 ```
 
 Above examples were in _TypeScript_. Same in plain _JavaScript_ would look like this:
