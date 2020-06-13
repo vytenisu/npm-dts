@@ -80,7 +80,7 @@ export class Generator extends Cli {
       verbose('Locating OS Temporary Directory...')
 
       try {
-        await new Promise((done) => {
+        await new Promise(done => {
           tmp.dir((tmpErr, tmpDir, rmTmp) => {
             if (tmpErr) {
               error('Could not create OS Temporary Directory!')
@@ -103,14 +103,14 @@ export class Generator extends Cli {
         hasError = true
 
         if (this.throwErrors) {
-          cleanupTasks.forEach((task) => task())
+          cleanupTasks.forEach(task => task())
           throw e
         }
       }
     }
 
     if (!hasError) {
-      await this._generate().catch(async (e) => {
+      await this._generate().catch(async e => {
         hasError = true
 
         const output = this.getOutput()
@@ -139,13 +139,13 @@ export class Generator extends Cli {
         }
 
         if (this.throwErrors) {
-          cleanupTasks.forEach((task) => task())
+          cleanupTasks.forEach(task => task())
           throw e
         }
       })
     }
 
-    cleanupTasks.forEach((task) => task())
+    cleanupTasks.forEach(task => task())
 
     if (!hasError) {
       info('Generation is completed!')
@@ -240,7 +240,7 @@ export class Generator extends Cli {
           verbose('"tmp" directory was prepared!')
           done()
         })
-        .catch((mkdirError) => {
+        .catch(mkdirError => {
           error(`Failed to create "${tmpDir}"!`)
           this.showDebugError(mkdirError)
 
@@ -267,7 +267,7 @@ export class Generator extends Cli {
     verbose('Cleaning up "tmp" directory...')
 
     return new Promise((done, fail) => {
-      rm(tmpDir, (rmError) => {
+      rm(tmpDir, rmError => {
         if (rmError) {
           error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
           this.showDebugError(rmError)
@@ -364,7 +364,7 @@ export class Generator extends Cli {
     }
 
     try {
-      readdirSync(dir).forEach((file) => {
+      readdirSync(dir).forEach(file => {
         if (statSync(join(dir, file)).isDirectory()) {
           files = this.getDeclarationFiles(join(dir, file), files)
         } else {
@@ -452,7 +452,7 @@ export class Generator extends Cli {
     const declarationFiles = this.getDeclarationFiles()
 
     verbose('Loading declaration files and mapping to modules...')
-    declarationFiles.forEach((file) => {
+    declarationFiles.forEach(file => {
       const moduleName = this.convertPathToModule(file)
 
       try {
@@ -508,7 +508,7 @@ export class Generator extends Cli {
 
     let lines = source.split('\n')
 
-    lines = lines.map((line) => {
+    lines = lines.map(line => {
       line = this.resolveImportSourcesAtLine(
         /(from ['"])([^'"]+)(['"])/,
         line,
