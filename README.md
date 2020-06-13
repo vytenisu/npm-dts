@@ -51,6 +51,7 @@ Additional supported configuration:
 - **-c** - pass additional directives to _TSC_. Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes and start with space inside. Value without space in some cases may be treated as invalid argument for _npm-dts_ itself.
 - **-L** - sets log level (_error_, _warn_, _info_, _verbose_, _debug_). Default is _info_.
 - **-f** - forces to attempt generating typings at least partially by ignoring non-critical errors.
+- **-o** - overrides recommended output target.
 
 ## Integration into WebPack
 

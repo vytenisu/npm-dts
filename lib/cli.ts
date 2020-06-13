@@ -32,6 +32,11 @@ export enum ECliArgument {
   logLevel = 'logLevel',
 
   /**
+   * Output file path (relative to root)
+   */
+  output = 'output',
+
+  /**
    * Flag which forces using own TSC as opposed to target TSC
    * This should only be used for testing npm-dts itself
    * This is because it generates incorrect module names
@@ -84,6 +89,11 @@ export interface INpmDtsArgs {
   force?: boolean
 
   /**
+   * Output file path (relative to root)
+   */
+  output?: string
+
+  /**
    * Flag which forces using own TSC as opposed to target TSC
    * This should only be used for testing npm-dts itself
    * This is because it generates incorrect module names
@@ -115,6 +125,7 @@ export class Cli {
     tsc: '',
     logLevel: ELogLevel.info,
     force: false,
+    output: 'index.d.ts',
     testMode: false,
   }
 
@@ -162,6 +173,11 @@ export class Cli {
           ['f', 'force'],
           'Ignores non-critical errors and attempts to at least partially generate typings',
           this.args.force,
+        )
+        .option(
+          ['o', 'output'],
+          'Overrides recommended output target to a custom one',
+          this.args.output,
         )
         .option(
           ['m', 'testMode'],

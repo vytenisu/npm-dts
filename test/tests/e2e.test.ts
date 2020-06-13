@@ -6,6 +6,7 @@ describe('Default behavior', () => {
   const scriptPath = path.resolve(__dirname, '..', '..', 'cli.js')
   const projectPath = path.resolve(__dirname, '..', 'sources', 'default')
   const jsProjectPath = path.resolve(__dirname, '..', 'sources', 'js')
+  const customOutput = 'test.d.ts'
 
   const dtsPath = path.resolve(
     __dirname,
@@ -15,9 +16,18 @@ describe('Default behavior', () => {
     'index.d.ts',
   )
 
+  const customDtsPath = path.resolve(
+    __dirname,
+    '..',
+    'sources',
+    'default',
+    customOutput,
+  )
+
   const jsDtsPath = path.resolve(__dirname, '..', 'sources', 'js', 'index.d.ts')
 
   let source: string
+  let customDtsSource: string
   let jsSource: string
 
   beforeAll(() => {
@@ -32,22 +42,28 @@ describe('Default behavior', () => {
     )
 
     exec(
+      `node "${scriptPath}" -m -r "${projectPath}" -c " -p tsconfig.test.json" -o ${customOutput} generate`,
+    )
+
+    exec(
       `node "${scriptPath}" -m -r "${jsProjectPath}" -c " -p tsconfig.test.json" generate`,
     )
 
     source = readFileSync(dtsPath, {encoding: 'utf8'})
+    customDtsSource = readFileSync(customDtsPath, {encoding: 'utf8'})
     jsSource = readFileSync(jsDtsPath, {encoding: 'utf8'})
   })
 
   afterAll(() => {
     unlinkSync(dtsPath)
+    unlinkSync(customDtsPath)
     unlinkSync(jsDtsPath)
   })
 
   it('exports all TS classes', () => {
     const classes = ['A', 'B', 'C']
 
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       expect(source.includes(`export class ${cls}`)).toBeTruthy()
     })
   })
@@ -55,7 +71,7 @@ describe('Default behavior', () => {
   it('exports all JS classes', () => {
     const classes = ['XXX', 'YYY']
 
-    classes.forEach(cls => {
+    classes.forEach((cls) => {
       expect(jsSource.includes(`export class ${cls}`)).toBeTruthy()
     })
   })
@@ -63,7 +79,7 @@ describe('Default behavior', () => {
   it('exports all types', () => {
     const interfaces = ['IText']
 
-    interfaces.forEach(int => {
+    interfaces.forEach((int) => {
       expect(source.includes(`export type ${int}`)).toBeTruthy()
     })
   })
@@ -71,7 +87,7 @@ describe('Default behavior', () => {
   it('exports all interfaces', () => {
     const interfaces = ['ISuggestedText', 'ASchema']
 
-    interfaces.forEach(int => {
+    interfaces.forEach((int) => {
       expect(source.includes(`export interface ${int}`)).toBeTruthy()
     })
   })
@@ -101,7 +117,7 @@ describe('Default behavior', () => {
   it('works correctly when index.ts is not used', () => {
     const modules = ['A', 'B']
 
-    modules.forEach(m => {
+    modules.forEach((m) => {
       expect(
         source.includes(
           `declare module 'test-default/test/sources/default/src/${m.toLowerCase()}'`,
@@ -128,8 +144,12 @@ describe('Default behavior', () => {
 
   it('re-exports JS modules', () => {
     const modules = ['XXX', 'YYY']
-    modules.forEach(m => {
+    modules.forEach((m) => {
       expect(jsSource.includes(`export var ${m}`)).toBeTruthy()
     })
+  })
+
+  it('allows to customize output target', () => {
+    expect(source).toBe(customDtsSource)
   })
 })

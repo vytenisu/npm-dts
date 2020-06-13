@@ -80,7 +80,7 @@ export class Generator extends Cli {
       verbose('Locating OS Temporary Directory...')
 
       try {
-        await new Promise(done => {
+        await new Promise((done) => {
           tmp.dir((tmpErr, tmpDir, rmTmp) => {
             if (tmpErr) {
               error('Could not create OS Temporary Directory!')
@@ -103,17 +103,19 @@ export class Generator extends Cli {
         hasError = true
 
         if (this.throwErrors) {
-          cleanupTasks.forEach(task => task())
+          cleanupTasks.forEach((task) => task())
           throw e
         }
       }
     }
 
     if (!hasError) {
-      await this._generate().catch(async e => {
+      await this._generate().catch(async (e) => {
         hasError = true
 
-        error('Generation of index.d.ts has failed!')
+        const output = this.getOutput()
+
+        error(`Generation of ${output} has failed!`)
         this.showDebugError(e)
 
         if (!this.useForce()) {
@@ -137,13 +139,13 @@ export class Generator extends Cli {
         }
 
         if (this.throwErrors) {
-          cleanupTasks.forEach(task => task())
+          cleanupTasks.forEach((task) => task())
           throw e
         }
       })
     }
 
-    cleanupTasks.forEach(task => task())
+    cleanupTasks.forEach((task) => task())
 
     if (!hasError) {
       info('Generation is completed!')
@@ -203,6 +205,13 @@ export class Generator extends Cli {
   }
 
   /**
+   * Gathers output path to be used (relative to root)
+   */
+  private getOutput(): string {
+    return this.getArgument(ECliArgument.output) as string
+  }
+
+  /**
    * Checks if script is forced to use its built-in TSC
    */
   private useTestMode(): boolean {
@@ -231,7 +240,7 @@ export class Generator extends Cli {
           verbose('"tmp" directory was prepared!')
           done()
         })
-        .catch(mkdirError => {
+        .catch((mkdirError) => {
           error(`Failed to create "${tmpDir}"!`)
           this.showDebugError(mkdirError)
 
@@ -258,7 +267,7 @@ export class Generator extends Cli {
     verbose('Cleaning up "tmp" directory...')
 
     return new Promise((done, fail) => {
-      rm(tmpDir, rmError => {
+      rm(tmpDir, (rmError) => {
         if (rmError) {
           error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
           this.showDebugError(rmError)
@@ -355,7 +364,7 @@ export class Generator extends Cli {
     }
 
     try {
-      readdirSync(dir).forEach(file => {
+      readdirSync(dir).forEach((file) => {
         if (statSync(join(dir, file)).isDirectory()) {
           files = this.getDeclarationFiles(join(dir, file), files)
         } else {
@@ -443,7 +452,7 @@ export class Generator extends Cli {
     const declarationFiles = this.getDeclarationFiles()
 
     verbose('Loading declaration files and mapping to modules...')
-    declarationFiles.forEach(file => {
+    declarationFiles.forEach((file) => {
       const moduleName = this.convertPathToModule(file)
 
       try {
@@ -499,7 +508,7 @@ export class Generator extends Cli {
 
     let lines = source.split('\n')
 
-    lines = lines.map(line => {
+    lines = lines.map((line) => {
       line = this.resolveImportSourcesAtLine(
         /(from ['"])([^'"]+)(['"])/,
         line,
@@ -557,8 +566,8 @@ export class Generator extends Cli {
   }
 
   /**
-   * Adds alias for main NPM package file to generated index.d.ts source
-   * @param source generated index.d.ts declaration source so far
+   * Adds alias for main NPM package file to generated .d.ts source
+   * @param source generated .d.ts declaration source so far
    */
   private addAlias(source: string) {
     verbose('Adding alias for main file of the package...')
@@ -585,24 +594,26 @@ export class Generator extends Cli {
   }
 
   /**
-   * Stores generated index.d.ts declaration source into file
-   * @param source generated index.d.ts source
+   * Stores generated .d.ts declaration source into file
+   * @param source generated .d.ts source
    */
   private storeResult(source: string) {
-    verbose('Storing typings into index.d.ts file...')
+    const output = this.getOutput()
+
+    verbose(`Storing typings into ${output} file...`)
 
     const root = this.getRoot()
-    const file = resolve(root, 'index.d.ts')
+    const file = resolve(root, output)
 
     try {
       writeFileSync(file, source, {encoding: 'utf8'})
     } catch (e) {
-      error('Failed to create index.d.ts!')
+      error(`Failed to create ${output}!`)
       this.showDebugError(e)
       throw e
     }
 
-    verbose('Successfully created index.d.ts file!')
+    verbose(`Successfully created ${output} file!`)
   }
 }
 
