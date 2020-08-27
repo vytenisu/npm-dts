@@ -63,7 +63,7 @@ describe('Default behavior', () => {
   it('exports all TS classes', () => {
     const classes = ['A', 'B', 'C']
 
-    classes.forEach((cls) => {
+    classes.forEach(cls => {
       expect(source.includes(`export class ${cls}`)).toBeTruthy()
     })
   })
@@ -71,7 +71,7 @@ describe('Default behavior', () => {
   it('exports all JS classes', () => {
     const classes = ['XXX', 'YYY']
 
-    classes.forEach((cls) => {
+    classes.forEach(cls => {
       expect(jsSource.includes(`export class ${cls}`)).toBeTruthy()
     })
   })
@@ -79,7 +79,7 @@ describe('Default behavior', () => {
   it('exports all types', () => {
     const interfaces = ['IText']
 
-    interfaces.forEach((int) => {
+    interfaces.forEach(int => {
       expect(source.includes(`export type ${int}`)).toBeTruthy()
     })
   })
@@ -87,7 +87,7 @@ describe('Default behavior', () => {
   it('exports all interfaces', () => {
     const interfaces = ['ISuggestedText', 'ASchema']
 
-    interfaces.forEach((int) => {
+    interfaces.forEach(int => {
       expect(source.includes(`export interface ${int}`)).toBeTruthy()
     })
   })
@@ -117,7 +117,7 @@ describe('Default behavior', () => {
   it('works correctly when index.ts is not used', () => {
     const modules = ['A', 'B']
 
-    modules.forEach((m) => {
+    modules.forEach(m => {
       expect(
         source.includes(
           `declare module 'test-default/test/sources/default/src/${m.toLowerCase()}'`,
@@ -144,7 +144,7 @@ describe('Default behavior', () => {
 
   it('re-exports JS modules', () => {
     const modules = ['XXX', 'YYY']
-    modules.forEach((m) => {
+    modules.forEach(m => {
       expect(jsSource.includes(`export var ${m}`)).toBeTruthy()
     })
   })
