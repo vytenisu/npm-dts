@@ -47,29 +47,21 @@ npm-dts generate
 
 ### Supported options
 
-<br />
-
 ```
 npm-dts [options] generate
 ```
 
-<style>
-  code {
-    white-space: nowrap;
-  }
-</style>
-
-| Option                          |           Alias           | Description                                                                                                                                                                                      |
-| ------------------------------- | :-----------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <code>--entry [file]</code>     |  <code>-e [file]</code>   | Allows changing main _src_ file from _index.ts_ to something else.                                                                                                                               |
-| <code>--force</code>            |      <code>-f</code>      | Ignores non-critical errors and attempts to at least partially generate typings (disabled by default).                                                                                           |
-| <code>--help</code>             |      <code>-h</code>      | Output usage information.                                                                                                                                                                        |
-| <code>--logLevel [level]</code> |  <code>-L [level]</code>  | Log level (error, warn, info, verbose, debug) (defaults to "info").                                                                                                                              |
-| <code>--output [file]</code>    |  <code>-o [file]</code>   | Overrides recommended output target to a custom one (defaults to "index.d.ts").                                                                                                                  |
-| <code>--root [path]</code>      |  <code>-r [path]</code>   | NPM package directory containing package.json (defaults to current working directory).                                                                                                           |
-| <code>--tmp [path]</code>       |  <code>-t [path]</code>   | Directory for storing temporary information (defaults to OS-specific temporary directory). Note that tool completely deletes this folder once finished.                                          |
-| <code>--tsc [options]</code>    | <code>-c [options]</code> | Passed through additional TSC options (defaults to ""). Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes. |
-| <code>--version</code>          |      <code>-v</code>      | Output the version number.                                                                                                                                                                       |
+| Option                                                       |                         Alias                          | Description                                                                                                                                                                                      |
+| ------------------------------------------------------------ | :----------------------------------------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| <code style="white-space: nowrap;">--entry [file]</code>     |  <code style="white-space: nowrap;">-e [file]</code>   | Allows changing main _src_ file from _index.ts_ to something else.                                                                                                                               |
+| <code style="white-space: nowrap;">--force</code>            |      <code style="white-space: nowrap;">-f</code>      | Ignores non-critical errors and attempts to at least partially generate typings (disabled by default).                                                                                           |
+| <code style="white-space: nowrap;">--help</code>             |      <code style="white-space: nowrap;">-h</code>      | Output usage information.                                                                                                                                                                        |
+| <code style="white-space: nowrap;">--logLevel [level]</code> |  <code style="white-space: nowrap;">-L [level]</code>  | Log level (error, warn, info, verbose, debug) (defaults to "info").                                                                                                                              |
+| <code style="white-space: nowrap;">--output [file]</code>    |  <code style="white-space: nowrap;">-o [file]</code>   | Overrides recommended output target to a custom one (defaults to "index.d.ts").                                                                                                                  |
+| <code style="white-space: nowrap;">--root [path]</code>      |  <code style="white-space: nowrap;">-r [path]</code>   | NPM package directory containing package.json (defaults to current working directory).                                                                                                           |
+| <code style="white-space: nowrap;">--tmp [path]</code>       |  <code style="white-space: nowrap;">-t [path]</code>   | Directory for storing temporary information (defaults to OS-specific temporary directory). Note that tool completely deletes this folder once finished.                                          |
+| <code style="white-space: nowrap;">--tsc [options]</code>    | <code style="white-space: nowrap;">-c [options]</code> | Passed through additional TSC options (defaults to ""). Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes. |
+| <code style="white-space: nowrap;">--version</code>          |      <code style="white-space: nowrap;">-v</code>      | Output the version number.                                                                                                                                                                       |
 
 <br>
 
@@ -83,7 +75,7 @@ You would want to use [**"npm-dts-webpack-plugin"**](https://www.npmjs.com/packa
 
 Example of how you could run generation of _index.d.ts_ automatically before every publish.
 
-```json
+```
 {
   // ......
   "scripts": {
