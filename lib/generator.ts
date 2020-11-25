@@ -2,7 +2,7 @@ import {readdirSync, statSync, writeFileSync} from 'fs'
 import {readFileSync} from 'fs'
 import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
-import {join, relative, resolve} from 'path'
+import {join, relative, resolve, dirname} from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
 import {Cli, ECliArgument, INpmDtsArgs} from './cli'
@@ -80,7 +80,7 @@ export class Generator extends Cli {
       verbose('Locating OS Temporary Directory...')
 
       try {
-        await new Promise(done => {
+        await new Promise<void>(done => {
           tmp.dir((tmpErr, tmpDir, rmTmp) => {
             if (tmpErr) {
               error('Could not create OS Temporary Directory!')
@@ -175,7 +175,7 @@ export class Generator extends Cli {
     await this.generateTypings()
     let source = await this.combineTypings()
     source = this.addAlias(source)
-    this.storeResult(source)
+    await this.storeResult(source)
   }
 
   private getLogLevel(): ELogLevel {
@@ -229,7 +229,7 @@ export class Generator extends Cli {
    * Creates TMP directory to be used for TSC operations
    * @param retries amount of times to retry on failure
    */
-  private makeTempDir(retries = MKDIR_RETRIES) {
+  private makeTempDir(retries = MKDIR_RETRIES): Promise<void> {
     const tmpDir = this.getTempDir()
     verbose('Preparing "tmp" directory...')
 
@@ -266,7 +266,7 @@ export class Generator extends Cli {
     const tmpDir = this.getTempDir()
     verbose('Cleaning up "tmp" directory...')
 
-    return new Promise((done, fail) => {
+    return new Promise<void>((done, fail) => {
       rm(tmpDir, rmError => {
         if (rmError) {
           error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
@@ -597,13 +597,25 @@ export class Generator extends Cli {
    * Stores generated .d.ts declaration source into file
    * @param source generated .d.ts source
    */
-  private storeResult(source: string) {
+  private async storeResult(source: string) {
     const output = this.getOutput()
-
-    verbose(`Storing typings into ${output} file...`)
-
     const root = this.getRoot()
     const file = resolve(root, output)
+    const folderPath = dirname(file)
+
+    verbose('Ensuring that output folder exists...')
+    debug(`Creating output folder: "${folderPath}"...`)
+
+    try {
+      await mkdir(folderPath)
+    } catch (mkdirError) {
+      error(`Failed to create "${folderPath}"!`)
+      this.showDebugError(mkdirError)
+      throw mkdirError
+    }
+
+    verbose('Output folder is ready!')
+    verbose(`Storing typings into ${output} file...`)
 
     try {
       writeFileSync(file, source, {encoding: 'utf8'})
