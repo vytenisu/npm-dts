@@ -7,6 +7,7 @@ import * as rm from 'rimraf'
 import * as tmp from 'tmp'
 import {Cli, ECliArgument, INpmDtsArgs} from './cli'
 import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
+import * as fs from 'fs'
 
 const MKDIR_RETRIES = 5
 
@@ -424,6 +425,8 @@ export class Generator extends Cli {
   ) {
     const packageDetails = this.getPackageDetails()
 
+    const fileExisted = fs.existsSync(path) && fs.lstatSync(path).isFile()
+
     if (rootType === IBasePathType.cwd) {
       path = relative(process.cwd(), path)
     } else if (rootType === IBasePathType.root) {
@@ -437,8 +440,11 @@ export class Generator extends Cli {
     }
 
     path = path.replace(/\\/g, '/')
-    path = path.replace(/\.[^.]+$/g, '')
-    path = path.replace(/\.d$/g, '')
+
+    if (fileExisted) {
+      path = path.replace(/\.[^.]+$/g, '')
+      path = path.replace(/\.d$/g, '')
+    }
 
     return path
   }
