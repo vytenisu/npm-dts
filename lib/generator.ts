@@ -75,6 +75,7 @@ export class Generator extends Cli {
     info(`Generating declarations for "${this.getRoot()}"...`)
 
     let hasError = false
+    let exception = null
     const cleanupTasks: (() => void)[] = []
 
     if (!this.tmpPassed) {
@@ -102,11 +103,7 @@ export class Generator extends Cli {
         })
       } catch (e) {
         hasError = true
-
-        if (this.throwErrors) {
-          cleanupTasks.forEach(task => task())
-          throw e
-        }
+        exception = e
       }
     }
 
@@ -139,10 +136,7 @@ export class Generator extends Cli {
           await this.clearTempDir()
         }
 
-        if (this.throwErrors) {
-          cleanupTasks.forEach(task => task())
-          throw e
-        }
+        exception = e
       })
     }
 
@@ -152,6 +146,10 @@ export class Generator extends Cli {
       info('Generation is completed!')
     } else {
       error('Generation failed!')
+
+      if (this.throwErrors) {
+        throw exception || new Error('Generation failed!')
+      }
     }
   }
 
