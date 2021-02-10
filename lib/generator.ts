@@ -584,7 +584,10 @@ export class Generator extends Cli {
       throw new Error('No entry file is available!')
     }
 
-    const mainFile = this.convertPathToModule(entry, IBasePathType.cwd)
+    const mainFile = this.convertPathToModule(
+      resolve(this.getRoot(), entry),
+      IBasePathType.root,
+    )
 
     source +=
       `\ndeclare module '${packageDetails.name}' {\n` +

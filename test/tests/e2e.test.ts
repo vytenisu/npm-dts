@@ -46,7 +46,7 @@ describe('Default behavior', () => {
     )
 
     exec(
-      `node "${scriptPath}" -m -r "${jsProjectPath}" -c " -p tsconfig.test.json" generate`,
+      `node "${scriptPath}" -m -r "${jsProjectPath}" -c " -p tsconfig.test.json" -e index.js generate`,
     )
 
     source = readFileSync(dtsPath, {encoding: 'utf8'})
