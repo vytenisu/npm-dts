@@ -413,17 +413,26 @@ export class Generator extends Cli {
   /**
    * Generates module name based on file path
    * @param path path to be converted to module name
-   * @param useRoot assumes path to be under target project root
-   * @param noPrefix disables addition of module name as prefix for module name
+   * @param options additional conversion options
    */
   private convertPathToModule(
     path: string,
-    rootType: IBasePathType = IBasePathType.tmp,
-    noPrefix = false,
+    options: ConvertPathToModuleOptions = {},
   ) {
+    const {
+      rootType = IBasePathType.tmp,
+      noPrefix = false,
+      noExtensionRemoval = false,
+      noExistenceCheck = false,
+    } = options
+
     const packageDetails = this.getPackageDetails()
 
-    const fileExisted = fs.existsSync(path) && fs.lstatSync(path).isFile()
+    const fileExisted =
+      noExistenceCheck ||
+      (!noExtensionRemoval &&
+        fs.existsSync(path) &&
+        fs.lstatSync(path).isFile())
 
     if (rootType === IBasePathType.cwd) {
       path = relative(process.cwd(), path)
@@ -439,7 +448,7 @@ export class Generator extends Cli {
 
     path = path.replace(/\\/g, '/')
 
-    if (fileExisted) {
+    if (fileExisted && !noExtensionRemoval) {
       path = path.replace(/\.[^.]+$/g, '')
       path = path.replace(/\.d$/g, '')
     }
@@ -484,11 +493,11 @@ export class Generator extends Cli {
 
       let resolvedModule = resolve(moduleName, relativePath)
 
-      resolvedModule = this.convertPathToModule(
-        resolvedModule,
-        IBasePathType.cwd,
-        true,
-      )
+      resolvedModule = this.convertPathToModule(resolvedModule, {
+        rootType: IBasePathType.cwd,
+        noPrefix: true,
+        noExtensionRemoval: true,
+      })
 
       if (!this.moduleExists(resolvedModule)) {
         resolvedModule += '/index'
@@ -584,10 +593,10 @@ export class Generator extends Cli {
       throw new Error('No entry file is available!')
     }
 
-    const mainFile = this.convertPathToModule(
-      resolve(this.getRoot(), entry),
-      IBasePathType.root,
-    )
+    const mainFile = this.convertPathToModule(resolve(this.getRoot(), entry), {
+      rootType: IBasePathType.root,
+      noExistenceCheck: true,
+    })
 
     source +=
       `\ndeclare module '${packageDetails.name}' {\n` +
@@ -661,4 +670,29 @@ export enum IBasePathType {
    * Base path is CWD
    */
   cwd = 'cwd',
+}
+
+/**
+ * Additional conversion options
+ */
+export interface ConvertPathToModuleOptions {
+  /**
+   * Type of base path used during path resolving
+   */
+  rootType?: IBasePathType
+
+  /**
+   * Disables addition of module name as prefix for module name
+   */
+  noPrefix?: boolean
+
+  /**
+   * Disables extension removal
+   */
+  noExtensionRemoval?: boolean
+
+  /**
+   * Disables existence check and assumes that file exists
+   */
+  noExistenceCheck?: boolean
 }
