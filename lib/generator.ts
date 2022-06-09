@@ -244,11 +244,11 @@ export class Generator extends Cli {
    * Checks how and if tree-shaking should be applied
    */
   private getShake(): 'off' | 'exportOnly' | 'allImports' {
-    const shake = this.getArgument(ECliArgument.shake) as undefined | 'off' | 'exportOnly' | 'allImports';
-    if (shake === undefined) return 'off';
-    if (shake === 'exportOnly' || shake === 'allImports' || shake === 'off') return shake;
-    error(`Unknown value for shake "${shake}"`);
-    if (shake === undefined) return 'off';
+    const shake = this.getArgument(ECliArgument.shake) as undefined | 'off' | 'exportOnly' | 'allImports'
+    if (shake === undefined) return 'off'
+    if (shake === 'exportOnly' || shake === 'allImports' || shake === 'off') return shake
+    error(`Unknown value for shake "${shake}"`)
+    if (shake === undefined) return 'off'
   }
 
   /**
@@ -542,7 +542,7 @@ export class Generator extends Cli {
    * @param moduleName name of module containing import
    */
   private resolveImportSources(source: string, moduleName: string) {
-    let lines = this.sourceLines(source);
+    let lines = this.sourceLines(source)
 
     lines = lines.map(line => {
       line = this.resolveImportSourcesAtLine(
@@ -570,7 +570,7 @@ export class Generator extends Cli {
     source = source.replace(/\n\r/g, '\n')
     source = source.replace(/\r/g, '\n')
 
-    let lines = source.split('\n')
+    const lines = source.split('\n')
     return lines
   }
 
@@ -580,31 +580,31 @@ export class Generator extends Cli {
     shakenTypings: Set<string>,
     filter: 'exportOnly' | 'allImports'
   ): void {
-    shakenTypings.add(moduleName);
-    const current = typings[moduleName];
-    let lines = this.sourceLines(current);
-    const refs = filter === 'allImports' ? this.findAllImportedRefs(lines) : this.findExportedRefsOnly(lines);
+    shakenTypings.add(moduleName)
+    const current = typings[moduleName]
+    const lines = this.sourceLines(current)
+    const refs = filter === 'allImports' ? this.findAllImportedRefs(lines) : this.findExportedRefsOnly(lines)
     verbose(`"${moduleName}" references ${JSON.stringify(refs)}`)
 
     for (const ref of refs) {
-      this.findDependencies(typings, ref, shakenTypings, filter);
+      this.findDependencies(typings, ref, shakenTypings, filter)
     }
   }
 
   private findExportedRefsOnly(lines: string[]) {
     const exports = /export .*? from ['"]([^'"]+)['"]/
     const refs = lines.map(l => l.match(exports))
-    return refs.filter(m => m !== null).map(m => m[1]);;
+    return refs.filter(m => m !== null).map(m => m[1])
   }
 
   private findAllImportedRefs(lines: string[]) {
-    const staticImports = /(from ['"])([^'"]+)(['"])/;
-    const inlineImport = /(import\(['"])([^'"]+)(['"]\))/;
+    const staticImports = /(from ['"])([^'"]+)(['"])/
+    const inlineImport = /(import\(['"])([^'"]+)(['"]\))/
     const refs = [
       ...lines.map(l => l.match(staticImports)),
       ...lines.map(l => l.match(inlineImport))
     ]
-    return refs.filter(m => m !== null).map(m => m[1]);;
+    return refs.filter(m => m !== null).map(m => m[1])
   }
 
   /**
@@ -621,18 +621,18 @@ export class Generator extends Cli {
     Object.entries(typings).forEach(([moduleName, fileSource]) => {
       fileSource = fileSource.replace(/declare /g, '')
       fileSource = this.resolveImportSources(fileSource, moduleName)
-      typings[moduleName] = fileSource;
+      typings[moduleName] = fileSource
     })
 
     const mainFile = this.getMain()
-    const shake = this.getShake();
+    const shake = this.getShake()
 
     if (shake !== 'off') {
       verbose(`Shaking typeings using the ${shake} strategy.`)
-      const referenced = new Set<string>();
-      this.findDependencies(typings, mainFile, referenced, shake);
-      const shakenTypings = Object.fromEntries(Array.from(referenced).map(ref => [ref, typings[ref]]));
-      typings = shakenTypings;
+      const referenced = new Set<string>()
+      this.findDependencies(typings, mainFile, referenced, shake)
+      const shakenTypings = Object.fromEntries(Array.from(referenced).map(ref => [ref, typings[ref]]))
+      typings = shakenTypings
     }
 
     const sourceParts: string[] = []
@@ -663,7 +663,7 @@ export class Generator extends Cli {
    * @param source generated .d.ts declaration source so far
    */
   private addAlias(source: string) {
-    if (this.noAlias()) return source;
+    if (this.noAlias()) return source
     verbose('Adding alias for main file of the package...')
 
     const packageDetails = this.getPackageDetails()
@@ -696,12 +696,12 @@ export class Generator extends Cli {
   }
 
   /**
-  * Append template where {0} is replaced with the name/path of the entry module.
-  * @param source generated .d.ts declaration source so far
-  */
+   * Append template where {0} is replaced with the name/path of the entry module.
+   * @param source generated .d.ts declaration source so far
+   */
   private addTemplate(source: string) {
-    const tpl = this.getTemplate();
-    if (!tpl) return source;
+    const tpl = this.getTemplate()
+    if (!tpl) return source
     verbose('Adding template')
 
     const entry = this.getEntry()
@@ -716,7 +716,7 @@ export class Generator extends Cli {
       noExistenceCheck: true,
     })
 
-    const appliedTemplate = tpl.replace('{0}', mainFile);
+    const appliedTemplate = tpl.replace('{0}', mainFile)
 
     source += '\n' + appliedTemplate + '\n'
 
