@@ -1,12 +1,12 @@
-import {readdirSync, statSync, writeFileSync} from 'fs'
-import {readFileSync} from 'fs'
+import { readdirSync, statSync, writeFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
-import {join, relative, resolve, dirname} from 'path'
+import { join, relative, resolve, dirname } from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
-import {Cli, ECliArgument, INpmDtsArgs} from './cli'
-import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
+import { Cli, ECliArgument, INpmDtsArgs } from './cli'
+import { debug, ELogLevel, error, info, init, verbose, warn } from './log'
 import * as fs from 'fs'
 
 const MKDIR_RETRIES = 5
@@ -218,6 +218,14 @@ export class Generator extends Cli {
   }
 
   /**
+   * Checks if an alias for the main NPM package file should be
+   * added to the generated .d.ts source
+   */
+  private noAlias(): boolean {
+    return this.getArgument(ECliArgument.noAlias) as boolean
+  }
+
+  /**
    * Checks if script is forced to attempt generation despite errors
    */
   private useForce(): boolean {
@@ -398,7 +406,7 @@ export class Generator extends Cli {
 
     try {
       this.packageInfo = JSON.parse(
-        readFileSync(packageJsonPath, {encoding: 'utf8'}),
+        readFileSync(packageJsonPath, { encoding: 'utf8' }),
       )
     } catch (e) {
       error(`Failed to read package.json at "'${packageJsonPath}'"`)
@@ -469,7 +477,7 @@ export class Generator extends Cli {
       const moduleName = this.convertPathToModule(file)
 
       try {
-        result[moduleName] = readFileSync(file, {encoding: 'utf8'})
+        result[moduleName] = readFileSync(file, { encoding: 'utf8' })
       } catch (e) {
         error(`Could not load declaration file '${file}'!`)
         this.showDebugError(e)
@@ -579,10 +587,12 @@ export class Generator extends Cli {
   }
 
   /**
-   * Adds alias for main NPM package file to generated .d.ts source
+   * Adds an  alias for the main NPM package file to the
+   * generated .d.ts source
    * @param source generated .d.ts declaration source so far
    */
   private addAlias(source: string) {
+    if (this.noAlias()) return source;
     verbose('Adding alias for main file of the package...')
 
     const packageDetails = this.getPackageDetails()
@@ -634,7 +644,7 @@ export class Generator extends Cli {
     verbose(`Storing typings into ${output} file...`)
 
     try {
-      writeFileSync(file, source, {encoding: 'utf8'})
+      writeFileSync(file, source, { encoding: 'utf8' })
     } catch (e) {
       error(`Failed to create ${output}!`)
       this.showDebugError(e)
