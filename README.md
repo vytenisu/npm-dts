@@ -14,13 +14,13 @@ _TypeScript_ picks up _index.d.ts_ automatically.
 
 Local:
 
-```
+```cmd
 npm install --save-dev npm-dts
 ```
 
 Global:
 
-```
+```cmd
 npm install -g npm-dts
 ```
 
@@ -32,50 +32,44 @@ Please make sure that target project has _"typescript"_ installed in _node_modul
 
 To see full _CLI_ help - run without arguments:
 
-```
+```cmd
 npm-dts
 ```
 
 Typical usage (using global install):
 
-```
+```cmd
 cd /your/project
 npm-dts generate
 ```
 
-<br />
-
 ### Supported options
 
-```
+```cmd
 npm-dts [options] generate
 ```
 
-| Option&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Alias&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Description                                                                                                                                                                                      |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| <code>--entry [file]</code>                                                                                                                                                                                                                                        | <code>-e [file]</code>                                                                                                                                                        | Allows changing main _src_ file from _index.ts_ to something else. It can also be declared as a path, relative to root.                                                                          |
-| <code>--force</code>                                                                                                                                                                                                                                               | <code>-f</code>                                                                                                                                                               | Ignores non-critical errors and attempts to at least partially generate typings (disabled by default).                                                                                           |
-| <code>--help</code>                                                                                                                                                                                                                                                | <code>-h</code>                                                                                                                                                               | Output usage information.                                                                                                                                                                        |
-| <code>--logLevel [level]</code>                                                                                                                                                                                                                                    | <code>-L [level]</code>                                                                                                                                                       | Log level (error, warn, info, verbose, debug) (defaults to "info").                                                                                                                              |
-| <code>--output [file]</code>                                                                                                                                                                                                                                       | <code>-o [file]</code>                                                                                                                                                        | Overrides recommended output target to a custom one (defaults to "index.d.ts").                                                                                                                  |
-| <code>--root [path]</code>                                                                                                                                                                                                                                         | <code>-r [path]</code>                                                                                                                                                        | NPM package directory containing package.json (defaults to current working directory).                                                                                                           |
-| <code>--tmp [path]</code>                                                                                                                                                                                                                                          | <code>-t [path]</code>                                                                                                                                                        | Directory for storing temporary information (defaults to OS-specific temporary directory). Note that tool completely deletes this folder once finished.                                          |
-| <code>--tsc [options]</code>                                                                                                                                                                                                                                       | <code>-c [options]</code>                                                                                                                                                     | Passed through additional TSC options (defaults to ""). Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes **and start with a space** (work-around for a bug in argument parsing dependency of _npm-dts_). |
-| <code>--version</code>                                                                                                                                                                                                                                             | <code>-v</code>                                                                                                                                                               | Output the version number.                                                                                                                                                                       |
-
-<br>
+| Option | Alias | Description |
+|--------|-------|-------------|
+| `--entry [file]` | `-e [file]` | Allows changing main _src_ file from _index.ts_ to something else. It can also be declared as a path, relative to root. |
+| `--force` | `-f` | Ignores non-critical errors and attempts to at least partially generate typings (disabled by default). |
+| `--help` | `-h` | Output usage information.|
+| `--logLevel [level]` | `-L [level]` | Log level (error, warn, info, verbose, debug) (defaults to "info"). |
+| `--output [file]` | `-o [file]` | Overrides recommended output target to a custom one (defaults to "index.d.ts").    |
+| `--root [path]` | `-r [path]` | NPM package directory containing package.json (defaults to current working directory).  |
+| `--tmp [path]` | `-t [path]` | Directory for storing temporary information (defaults to OS-specific temporary directory). Note that tool completely deletes this folder once finished. |
+| `--tsc [options]` | `-c [options]` | Passed through additional TSC options (defaults to ""). Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes **and start with a space** (work-around for a bug in argument parsing dependency of _npm-dts_). |
+| `--version` | `-v` | Output the version number. |
 
 ## Integration using _WebPack_
 
 You would want to use [**"npm-dts-webpack-plugin"**](https://www.npmjs.com/package/npm-dts-webpack-plugin) package instead.
 
-<br />
-
 ## Integration into _NPM_ scripts
 
 Example of how you could run generation of _index.d.ts_ automatically before every publish.
 
-```
+```json
 {
   // ......
   "scripts": {
@@ -87,8 +81,6 @@ Example of how you could run generation of _index.d.ts_ automatically before eve
 ```
 
 Another possible option would be to execute "npm run dts" as part of bundling task.
-
-<br />
 
 ## Integration into custom solution
 
