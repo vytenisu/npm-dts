@@ -1,12 +1,12 @@
-import {readdirSync, statSync, writeFileSync} from 'fs'
-import {readFileSync} from 'fs'
+import { readdirSync, statSync, writeFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
-import {join, relative, resolve, dirname} from 'path'
+import { join, relative, resolve, dirname } from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
-import {Cli, ECliArgument, INpmDtsArgs} from './cli'
-import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
+import { Cli, ECliArgument, INpmDtsArgs } from './cli'
+import { debug, ELogLevel, error, info, init, verbose, warn } from './log'
 import * as fs from 'fs'
 
 const MKDIR_RETRIES = 5
@@ -225,6 +225,17 @@ export class Generator extends Cli {
   }
 
   /**
+   * Checks how and if tree-shaking should be applied
+   */
+  private getShake(): 'off' | 'exportOnly' | 'allImports' {
+    const shake = this.getArgument(ECliArgument.shake) as undefined | 'off' | 'exportOnly' | 'allImports';
+    if (shake === undefined) return 'off';
+    if (shake === 'exportOnly' || shake === 'allImports' || shake === 'off') return shake;
+    error(`Unknown value for shake "${shake}"`);
+    if (shake === undefined) return 'off';
+  }
+
+  /**
    * Creates TMP directory to be used for TSC operations
    * @param retries amount of times to retry on failure
    */
@@ -398,7 +409,7 @@ export class Generator extends Cli {
 
     try {
       this.packageInfo = JSON.parse(
-        readFileSync(packageJsonPath, {encoding: 'utf8'}),
+        readFileSync(packageJsonPath, { encoding: 'utf8' }),
       )
     } catch (e) {
       error(`Failed to read package.json at "'${packageJsonPath}'"`)
@@ -469,7 +480,7 @@ export class Generator extends Cli {
       const moduleName = this.convertPathToModule(file)
 
       try {
-        result[moduleName] = readFileSync(file, {encoding: 'utf8'})
+        result[moduleName] = readFileSync(file, { encoding: 'utf8' })
       } catch (e) {
         error(`Could not load declaration file '${file}'!`)
         this.showDebugError(e)
@@ -515,11 +526,7 @@ export class Generator extends Cli {
    * @param moduleName name of module containing import
    */
   private resolveImportSources(source: string, moduleName: string) {
-    source = source.replace(/\r\n/g, '\n')
-    source = source.replace(/\n\r/g, '\n')
-    source = source.replace(/\r/g, '\n')
-
-    let lines = source.split('\n')
+    let lines = this.sourceLines(source);
 
     lines = lines.map(line => {
       line = this.resolveImportSourcesAtLine(
@@ -542,22 +549,78 @@ export class Generator extends Cli {
     return source
   }
 
+  private sourceLines(source: string) {
+    source = source.replace(/\r\n/g, '\n')
+    source = source.replace(/\n\r/g, '\n')
+    source = source.replace(/\r/g, '\n')
+
+    let lines = source.split('\n')
+    return lines
+  }
+
+  private findDependencies(
+    typings: IDeclarationMap,
+    moduleName: string,
+    shakenTypings: Set<string>,
+    filter: 'exportOnly' | 'allImports'
+  ): void {
+    shakenTypings.add(moduleName);
+    const current = typings[moduleName];
+    let lines = this.sourceLines(current);
+    const refs = filter === 'allImports' ? this.findAllImportedRefs(lines) : this.findExportedRefsOnly(lines);
+    verbose(`"${moduleName}" references ${JSON.stringify(refs)}`)
+
+    for (const ref of refs) {
+      this.findDependencies(typings, ref, shakenTypings, filter);
+    }
+  }
+
+  private findExportedRefsOnly(lines: string[]) {
+    const exports = /export .*? from ['"]([^'"]+)['"]/
+    const refs = lines.map(l => l.match(exports))
+    return refs.filter(m => m !== null).map(m => m[1]);;
+  }
+
+  private findAllImportedRefs(lines: string[]) {
+    const staticImports = /(from ['"])([^'"]+)(['"])/;
+    const inlineImport = /(import\(['"])([^'"]+)(['"]\))/;
+    const refs = [
+      ...lines.map(l => l.match(staticImports)),
+      ...lines.map(l => l.match(inlineImport))
+    ]
+    return refs.filter(m => m !== null).map(m => m[1]);;
+  }
+
   /**
    * Combines typings into a single declaration source
    */
   private async combineTypings() {
-    const typings = this.loadTypings()
+    let typings = this.loadTypings()
     await this.clearTempDir()
 
     this.moduleNames = Object.keys(typings)
 
     verbose('Combining typings into single file...')
 
-    const sourceParts: string[] = []
-
     Object.entries(typings).forEach(([moduleName, fileSource]) => {
       fileSource = fileSource.replace(/declare /g, '')
       fileSource = this.resolveImportSources(fileSource, moduleName)
+      typings[moduleName] = fileSource;
+    })
+
+    const mainFile = this.getMain()
+    const shake = this.getShake();
+
+    if (shake !== 'off') {
+      verbose(`Shaking typeings using the ${shake} strategy.`)
+      const referenced = new Set<string>();
+      this.findDependencies(typings, mainFile, referenced, shake);
+      const shakenTypings = Object.fromEntries(Array.from(referenced).map(ref => [ref, typings[ref]]));
+      typings = shakenTypings;
+    }
+
+    const sourceParts: string[] = []
+    Object.entries(typings).forEach(([moduleName, fileSource]) => {
       sourceParts.push(
         `declare module '${moduleName}' {\n${(fileSource as string).replace(
           /^./gm,
@@ -586,6 +649,20 @@ export class Generator extends Cli {
     verbose('Adding alias for main file of the package...')
 
     const packageDetails = this.getPackageDetails()
+    const mainFile = this.getMain()
+
+    source +=
+      `\ndeclare module '${packageDetails.name}' {\n` +
+      `  import main = require('${mainFile}');\n` +
+      '  export = main;\n' +
+      '}'
+
+    verbose('Successfully created alias for main file!')
+
+    return source
+  }
+
+  private getMain() {
     const entry = this.getEntry()
 
     if (!entry) {
@@ -597,16 +674,7 @@ export class Generator extends Cli {
       rootType: IBasePathType.root,
       noExistenceCheck: true,
     })
-
-    source +=
-      `\ndeclare module '${packageDetails.name}' {\n` +
-      `  import main = require('${mainFile}');\n` +
-      '  export = main;\n' +
-      '}'
-
-    verbose('Successfully created alias for main file!')
-
-    return source
+    return mainFile
   }
 
   /**
@@ -634,7 +702,7 @@ export class Generator extends Cli {
     verbose(`Storing typings into ${output} file...`)
 
     try {
-      writeFileSync(file, source, {encoding: 'utf8'})
+      writeFileSync(file, source, { encoding: 'utf8' })
     } catch (e) {
       error(`Failed to create ${output}!`)
       this.showDebugError(e)
