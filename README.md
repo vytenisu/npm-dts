@@ -53,6 +53,7 @@ npm-dts [options] generate
 |--------|-------|-------------|
 | `--entry [file]` | `-e [file]` | Allows changing main _src_ file from _index.ts_ to something else. It can also be declared as a path, relative to root. |
 | `--force` | `-f` | Ignores non-critical errors and attempts to at least partially generate typings (disabled by default). |
+| `--template` | | Append this template where {0} is replaced with the name/path of the entry module. |
 | `--help` | `-h` | Output usage information. |
 | `--logLevel [level]` | `-L [level]` | Log level (error, warn, info, verbose, debug) (defaults to "info"). |
 | `--output [file]` | `-o [file]` | Overrides recommended output target to a custom one (defaults to "index.d.ts"). |

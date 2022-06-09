@@ -1,6 +1,6 @@
 import * as args from 'args'
 import * as path from 'path'
-import {ELogLevel} from './log'
+import { ELogLevel } from './log'
 
 /**
  * CLI argument names
@@ -35,6 +35,11 @@ export enum ECliArgument {
    * Output file path (relative to root)
    */
   output = 'output',
+
+  /**
+   * Append this template where {0} is replaced with the name/path of the entry module.
+   */
+  template = 'template',
 
   /**
    * Flag which forces using own TSC as opposed to target TSC
@@ -94,6 +99,11 @@ export interface INpmDtsArgs {
   output?: string
 
   /**
+   * Append this template where {0} is replaced with the name/path of the entry module.
+   */
+  template?: string
+
+  /**
    * Flag which forces using own TSC as opposed to target TSC
    * This should only be used for testing npm-dts itself
    * This is because it generates incorrect module names
@@ -126,6 +136,7 @@ export class Cli {
     logLevel: ELogLevel.info,
     force: false,
     output: 'index.d.ts',
+    template: undefined,
     testMode: false,
   }
 
@@ -178,6 +189,11 @@ export class Cli {
           ['o', 'output'],
           'Overrides recommended output target to a custom one',
           this.args.output,
+        )
+        .option(
+          'template',
+          'Append this template where {0} is replaced with the name/path of the entry module.',
+          this.args.template,
         )
         .option(
           ['m', 'testMode'],

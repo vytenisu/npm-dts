@@ -1,12 +1,12 @@
-import {readdirSync, statSync, writeFileSync} from 'fs'
-import {readFileSync} from 'fs'
+import { readdirSync, statSync, writeFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
-import {join, relative, resolve, dirname} from 'path'
+import { join, relative, resolve, dirname } from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
-import {Cli, ECliArgument, INpmDtsArgs} from './cli'
-import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
+import { Cli, ECliArgument, INpmDtsArgs } from './cli'
+import { debug, ELogLevel, error, info, init, verbose, warn } from './log'
 import * as fs from 'fs'
 
 const MKDIR_RETRIES = 5
@@ -174,6 +174,7 @@ export class Generator extends Cli {
     await this.generateTypings()
     let source = await this.combineTypings()
     source = this.addAlias(source)
+    source = this.addTemplate(source)
     await this.storeResult(source)
   }
 
@@ -208,6 +209,13 @@ export class Generator extends Cli {
    */
   private getOutput(): string {
     return this.getArgument(ECliArgument.output) as string
+  }
+
+  /**
+   * Append this template where {0} is replaced with the name/path of the entry module.
+   */
+  private getTemplate(): string | undefined {
+    return this.getArgument(ECliArgument.template) as string | undefined
   }
 
   /**
@@ -398,7 +406,7 @@ export class Generator extends Cli {
 
     try {
       this.packageInfo = JSON.parse(
-        readFileSync(packageJsonPath, {encoding: 'utf8'}),
+        readFileSync(packageJsonPath, { encoding: 'utf8' }),
       )
     } catch (e) {
       error(`Failed to read package.json at "'${packageJsonPath}'"`)
@@ -469,7 +477,7 @@ export class Generator extends Cli {
       const moduleName = this.convertPathToModule(file)
 
       try {
-        result[moduleName] = readFileSync(file, {encoding: 'utf8'})
+        result[moduleName] = readFileSync(file, { encoding: 'utf8' })
       } catch (e) {
         error(`Could not load declaration file '${file}'!`)
         this.showDebugError(e)
@@ -610,6 +618,36 @@ export class Generator extends Cli {
   }
 
   /**
+  * Append template where {0} is replaced with the name/path of the entry module.
+  * @param source generated .d.ts declaration source so far
+  */
+  private addTemplate(source: string) {
+    const tpl = this.getTemplate();
+    if (!tpl) return source;
+    verbose('Adding template')
+
+    const entry = this.getEntry()
+
+    if (!entry) {
+      error('No entry file is available!')
+      throw new Error('No entry file is available!')
+    }
+
+    const mainFile = this.convertPathToModule(resolve(this.getRoot(), entry), {
+      rootType: IBasePathType.root,
+      noExistenceCheck: true,
+    })
+
+    const appliedTemplate = tpl.replace('{0}', mainFile);
+
+    source += '\n' + appliedTemplate + '\n'
+
+    verbose('Successfully added template!')
+
+    return source
+  }
+
+  /**
    * Stores generated .d.ts declaration source into file
    * @param source generated .d.ts source
    */
@@ -634,7 +672,7 @@ export class Generator extends Cli {
     verbose(`Storing typings into ${output} file...`)
 
     try {
-      writeFileSync(file, source, {encoding: 'utf8'})
+      writeFileSync(file, source, { encoding: 'utf8' })
     } catch (e) {
       error(`Failed to create ${output}!`)
       this.showDebugError(e)
