@@ -58,6 +58,11 @@ export enum ECliArgument {
    * Flag which forces attempting generation at least partially despite errors
    */
   force = 'force',
+
+  /**
+   * Basic tree-shaking on module level
+   */
+  shake = 'shake',
 }
 
 /**
@@ -105,6 +110,11 @@ export interface INpmDtsArgs {
   force?: boolean
 
   /**
+   * Basic tree-shaking on module level
+   */
+  shake?: 'off' | 'exportOnly' | 'allImports'
+
+  /**
    * Output file path (relative to root)
    */
   output?: string
@@ -147,6 +157,7 @@ export class Cli {
     logLevel: ELogLevel.info,
     noAlias: false,
     force: false,
+    shake: 'off',
     output: 'index.d.ts',
     template: undefined,
     testMode: false,
@@ -203,6 +214,11 @@ export class Cli {
           this.args.force,
         )
         .option(
+          'shake',
+          'Basic tree-shaking for modules. (off (default), exportOnly, allImports). Drops modules not referenced by entry. exportOnly only keeps modules which are referenced with the export from ... keyowrd.',
+          this.args.shake,
+        )
+        .option(
           ['o', 'output'],
           'Overrides recommended output target to a custom one',
           this.args.output,
@@ -217,7 +233,7 @@ export class Cli {
           'Configures npm-dts for self-test',
           this.args.testMode,
         )
-        .command('generate', 'Start generation', (name, sub, options) => {
+        .command('generate', 'Start generation', (name: any, sub: any, options: any) => {
           this.launched = true
           this.storeArguments(options)
         })
