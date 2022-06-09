@@ -49,6 +49,12 @@ export enum ECliArgument {
   testMode = 'testMode',
 
   /**
+   * Flag which forces not to add an alias for the main NPM
+   * package file to the generated .d.ts source
+   */
+  noAlias = 'noAlias',
+
+  /**
    * Flag which forces attempting generation at least partially despite errors
    */
   force = 'force',
@@ -87,6 +93,11 @@ export interface INpmDtsArgs {
    * Selected logging level
    */
   logLevel?: ELogLevel
+
+  /**
+   * Don't add an alias for the main NPM package file to the generated .d.ts source
+   */
+  noAlias?: boolean
 
   /**
    * Attempts to at least partially generate typings ignoring non-critical errors
@@ -134,6 +145,7 @@ export class Cli {
     tmp: '<TEMP>',
     tsc: '',
     logLevel: ELogLevel.info,
+    noAlias: false,
     force: false,
     output: 'index.d.ts',
     template: undefined,
@@ -179,6 +191,11 @@ export class Cli {
           ['L', 'logLevel'],
           'Log level (error, warn, info, verbose, debug)',
           this.args.logLevel,
+        )
+        .option(
+          'noAlias',
+          'Don\'t add an alias for the main NPM package file to the generated .d.ts source',
+          this.args.noAlias,
         )
         .option(
           ['f', 'force'],

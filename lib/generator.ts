@@ -226,6 +226,14 @@ export class Generator extends Cli {
   }
 
   /**
+   * Checks if an alias for the main NPM package file should be
+   * added to the generated .d.ts source
+   */
+  private noAlias(): boolean {
+    return this.getArgument(ECliArgument.noAlias) as boolean
+  }
+
+  /**
    * Checks if script is forced to attempt generation despite errors
    */
   private useForce(): boolean {
@@ -587,10 +595,12 @@ export class Generator extends Cli {
   }
 
   /**
-   * Adds alias for main NPM package file to generated .d.ts source
+   * Adds an  alias for the main NPM package file to the
+   * generated .d.ts source
    * @param source generated .d.ts declaration source so far
    */
   private addAlias(source: string) {
+    if (this.noAlias()) return source;
     verbose('Adding alias for main file of the package...')
 
     const packageDetails = this.getPackageDetails()
