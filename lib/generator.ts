@@ -1,12 +1,12 @@
-import { readdirSync, statSync, writeFileSync } from 'fs'
-import { readFileSync } from 'fs'
+import {readdirSync, statSync, writeFileSync} from 'fs'
+import {readFileSync} from 'fs'
 import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
-import { join, relative, resolve, dirname } from 'path'
+import {join, relative, resolve, dirname} from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
-import { Cli, ECliArgument, INpmDtsArgs } from './cli'
-import { debug, ELogLevel, error, info, init, verbose, warn } from './log'
+import {Cli, ECliArgument, INpmDtsArgs} from './cli'
+import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
 import * as fs from 'fs'
 
 const MKDIR_RETRIES = 5
@@ -244,9 +244,14 @@ export class Generator extends Cli {
    * Checks how and if tree-shaking should be applied
    */
   private getShake(): 'off' | 'exportOnly' | 'allImports' {
-    const shake = this.getArgument(ECliArgument.shake) as undefined | 'off' | 'exportOnly' | 'allImports'
+    const shake = this.getArgument(ECliArgument.shake) as
+      | undefined
+      | 'off'
+      | 'exportOnly'
+      | 'allImports'
     if (shake === undefined) return 'off'
-    if (shake === 'exportOnly' || shake === 'allImports' || shake === 'off') return shake
+    if (shake === 'exportOnly' || shake === 'allImports' || shake === 'off')
+      return shake
     error(`Unknown value for shake "${shake}"`)
     if (shake === undefined) return 'off'
   }
@@ -425,7 +430,7 @@ export class Generator extends Cli {
 
     try {
       this.packageInfo = JSON.parse(
-        readFileSync(packageJsonPath, { encoding: 'utf8' }),
+        readFileSync(packageJsonPath, {encoding: 'utf8'}),
       )
     } catch (e) {
       error(`Failed to read package.json at "'${packageJsonPath}'"`)
@@ -496,7 +501,7 @@ export class Generator extends Cli {
       const moduleName = this.convertPathToModule(file)
 
       try {
-        result[moduleName] = readFileSync(file, { encoding: 'utf8' })
+        result[moduleName] = readFileSync(file, {encoding: 'utf8'})
       } catch (e) {
         error(`Could not load declaration file '${file}'!`)
         this.showDebugError(e)
@@ -578,12 +583,15 @@ export class Generator extends Cli {
     typings: IDeclarationMap,
     moduleName: string,
     shakenTypings: Set<string>,
-    filter: 'exportOnly' | 'allImports'
+    filter: 'exportOnly' | 'allImports',
   ): void {
     shakenTypings.add(moduleName)
     const current = typings[moduleName]
     const lines = this.sourceLines(current)
-    const refs = filter === 'allImports' ? this.findAllImportedRefs(lines) : this.findExportedRefsOnly(lines)
+    const refs =
+      filter === 'allImports'
+        ? this.findAllImportedRefs(lines)
+        : this.findExportedRefsOnly(lines)
     verbose(`"${moduleName}" references ${JSON.stringify(refs)}`)
 
     for (const ref of refs) {
@@ -602,7 +610,7 @@ export class Generator extends Cli {
     const inlineImport = /(import\(['"])([^'"]+)(['"]\))/
     const refs = [
       ...lines.map(l => l.match(staticImports)),
-      ...lines.map(l => l.match(inlineImport))
+      ...lines.map(l => l.match(inlineImport)),
     ]
     return refs.filter(m => m !== null).map(m => m[1])
   }
@@ -631,7 +639,9 @@ export class Generator extends Cli {
       verbose(`Shaking typeings using the ${shake} strategy.`)
       const referenced = new Set<string>()
       this.findDependencies(typings, mainFile, referenced, shake)
-      const shakenTypings = Object.fromEntries(Array.from(referenced).map(ref => [ref, typings[ref]]))
+      const shakenTypings = Object.fromEntries(
+        Array.from(referenced).map(ref => [ref, typings[ref]]),
+      )
       typings = shakenTypings
     }
 
@@ -750,7 +760,7 @@ export class Generator extends Cli {
     verbose(`Storing typings into ${output} file...`)
 
     try {
-      writeFileSync(file, source, { encoding: 'utf8' })
+      writeFileSync(file, source, {encoding: 'utf8'})
     } catch (e) {
       error(`Failed to create ${output}!`)
       this.showDebugError(e)
