@@ -93,23 +93,23 @@ describe('Default behavior', () => {
   })
 
   it('does not leave relative paths', () => {
-    expect(source.includes('from \'.')).toBeFalsy()
-    expect(jsSource.includes('from \'.')).toBeFalsy()
-    expect(source.includes('import(\'.')).toBeFalsy()
-    expect(jsSource.includes('import(\'.')).toBeFalsy()
+    expect(source.includes("from '.")).toBeFalsy()
+    expect(jsSource.includes("from '.")).toBeFalsy()
+    expect(source.includes("import('.")).toBeFalsy()
+    expect(jsSource.includes("import('.")).toBeFalsy()
   })
 
   it('does not touch 3rd party module imports', () => {
-    expect(source.includes('\'winston\'')).toBeTruthy()
+    expect(source.includes("'winston'")).toBeTruthy()
   })
 
   it('works correctly when index.ts is used', () => {
     expect(
-      source.includes('from \'test-default/test/sources/default/src/c/index\''),
+      source.includes("from 'test-default/test/sources/default/src/c/index'"),
     ).toBeTruthy()
     expect(
       source.includes(
-        'declare module \'test-default/test/sources/default/src/c/index\'',
+        "declare module 'test-default/test/sources/default/src/c/index'",
       ),
     ).toBeTruthy()
   })
@@ -135,29 +135,29 @@ describe('Default behavior', () => {
   it('works correctly when module has a dot in its name', () => {
     expect(
       source.includes(
-        'declare module \'test-default/test/sources/default/src/a.schema\'',
+        "declare module 'test-default/test/sources/default/src/a.schema'",
       ),
     ).toBeTruthy()
 
     expect(
-      source.includes('from \'test-default/test/sources/default/src/a.schema\''),
+      source.includes("from 'test-default/test/sources/default/src/a.schema'"),
     ).toBeTruthy()
   })
 
   it('exports main NPM package module', () => {
-    expect(source.includes('declare module \'test-default\'')).toBeTruthy()
-    expect(jsSource.includes('declare module \'test-js\'')).toBeTruthy()
+    expect(source.includes("declare module 'test-default'")).toBeTruthy()
+    expect(jsSource.includes("declare module 'test-js'")).toBeTruthy()
   })
 
   it('exports entry point under module name', () => {
-    expect(source.includes('require(\'test-default/index\')')).toBeTruthy()
-    expect(jsSource.includes('require(\'test-js/index\')')).toBeTruthy()
+    expect(source.includes("require('test-default/index')")).toBeTruthy()
+    expect(jsSource.includes("require('test-js/index')")).toBeTruthy()
   })
 
   it('re-exports JS modules', () => {
     const modules = ['XXX', 'YYY']
     modules.forEach(m => {
-      expect(jsSource.includes(`export var ${m}`)).toBeTruthy()
+      expect(jsSource.includes(`export const ${m}`)).toBeTruthy()
     })
   })
 

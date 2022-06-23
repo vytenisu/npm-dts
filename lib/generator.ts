@@ -69,7 +69,7 @@ export class Generator extends Cli {
   }
 
   /**
-   * Executes generation of single declaration file
+   * Executes generation of an aggregated dts file
    */
   public async generate() {
     info(`Generating declarations for "${this.getRoot()}"...`)
@@ -417,7 +417,7 @@ export class Generator extends Cli {
    */
   private convertPathToModule(
     path: string,
-    options: ConvertPathToModuleOptions = {},
+    options: IConvertPathToModuleOptions = {},
   ) {
     const {
       rootType = IBasePathType.tmp,
@@ -675,7 +675,7 @@ export enum IBasePathType {
 /**
  * Additional conversion options
  */
-export interface ConvertPathToModuleOptions {
+export interface IConvertPathToModuleOptions {
   /**
    * Type of base path used during path resolving
    */
