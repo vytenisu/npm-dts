@@ -66,7 +66,7 @@ export enum ECliArgument {
 }
 
 /**
- * Format for storing passed argument values
+ * Configuration structure for generating an aggregated dts file
  */
 export interface INpmDtsArgs {
   /**
@@ -75,7 +75,7 @@ export interface INpmDtsArgs {
   [argName: string]: string | boolean
 
   /**
-   * Main file of non-bundled package source
+   * Main file of non-bundled package source. Can be a path relative to TSC rootDir.
    */
   entry?: string
 
