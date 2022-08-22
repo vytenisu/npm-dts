@@ -587,6 +587,10 @@ export class Generator extends Cli {
   ): void {
     shakenTypings.add(moduleName)
     const current = typings[moduleName]
+    if (current === undefined) {
+      warn(`no typings for "${moduleName}"`)
+      return
+    }
     const lines = this.sourceLines(current)
     const refs =
       filter === 'allImports'
