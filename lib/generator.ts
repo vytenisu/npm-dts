@@ -611,8 +611,8 @@ export class Generator extends Cli {
   }
 
   private findAllImportedRefs(lines: string[]) {
-    const staticImports = /(from ['"])([^'"]+)(['"])/
-    const inlineImport = /(import\(['"])([^'"]+)(['"]\))/
+    const staticImports = /from ['"]([^'"]+)['"]/
+    const inlineImport = /import\(['"]([^'"]+)['"]\)/
     const refs = [
       ...lines.map(l => l.match(staticImports)),
       ...lines.map(l => l.match(inlineImport)),
