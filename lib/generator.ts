@@ -585,12 +585,12 @@ export class Generator extends Cli {
     shakenTypings: Set<string>,
     filter: 'exportOnly' | 'allImports',
   ): void {
-    shakenTypings.add(moduleName)
     const current = typings[moduleName]
     if (current === undefined) {
       warn(`no typings for "${moduleName}"`)
       return
     }
+    shakenTypings.add(moduleName)
     const lines = this.sourceLines(current)
     const refs =
       filter === 'allImports'
@@ -599,6 +599,7 @@ export class Generator extends Cli {
     verbose(`"${moduleName}" references ${JSON.stringify(refs)}`)
 
     for (const ref of refs) {
+      if (shakenTypings.has(ref)) continue
       this.findDependencies(typings, ref, shakenTypings, filter)
     }
   }
