@@ -173,8 +173,8 @@ export class Generator extends Cli {
   private async _generate() {
     await this.generateTypings()
     let source = await this.combineTypings()
-    source = this.addAlias(source)
-    source = this.addTemplate(source)
+    if (this.addAlias()) source = this.appendAlias(source)
+    if (this.addTemplate()) source = this.appendTemplate(source)
     await this.storeResult(source)
   }
 
@@ -218,6 +218,10 @@ export class Generator extends Cli {
     return this.getArgument(ECliArgument.template) as string | undefined
   }
 
+  private addTemplate(): boolean {
+    return this.getArgument(ECliArgument.template) !== undefined
+  }
+
   /**
    * Checks if script is forced to use its built-in TSC
    */
@@ -229,8 +233,8 @@ export class Generator extends Cli {
    * Checks if an alias for the main NPM package file should be
    * added to the generated .d.ts source
    */
-  private noAlias(): boolean {
-    return this.getArgument(ECliArgument.addAlias) === 'false'
+  private addAlias(): boolean {
+    return this.getArgument(ECliArgument.addAlias) !== 'false'
   }
 
   /**
@@ -670,8 +674,7 @@ export class Generator extends Cli {
    * generated .d.ts source
    * @param source generated .d.ts declaration source so far
    */
-  private addAlias(source: string) {
-    if (this.noAlias()) return source
+  private appendAlias(source: string) {
     verbose('Adding alias for main file of the package...')
 
     const packageDetails = this.getPackageDetails()
@@ -707,9 +710,7 @@ export class Generator extends Cli {
    * Append template where {0} is replaced with the name/path of the entry module.
    * @param source generated .d.ts declaration source so far
    */
-  private addTemplate(source: string) {
-    const tpl = this.getTemplate()
-    if (!tpl) return source
+  private appendTemplate(source: string) {
     verbose('Adding template')
 
     const entry = this.getEntry()
@@ -724,6 +725,7 @@ export class Generator extends Cli {
       noExistenceCheck: true,
     })
 
+    const tpl = this.getTemplate()
     const appliedTemplate = tpl.replace('{0}', mainFile)
 
     source += '\n' + appliedTemplate + '\n'
