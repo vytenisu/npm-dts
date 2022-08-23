@@ -53,12 +53,12 @@ npm-dts [options] generate
 |--------|-------|-------------|
 | `--entry [file]` | `-e [file]` | Allows changing main _src_ file from _index.ts_ to something else. It can also be declared as a path, relative to root. |
 | `--force` | `-f` | Ignores non-critical errors and attempts to at least partially generate typings (disabled by default). |
-| `--template` | | Append this template where {0} is replaced with the name/path of the entry module. |
+| `--template` | | Append this template where `{0}` is replaced with the name/path of the entry module. |
 | `--noAlias` | | Don't add an alias for the main NPM package file to the generated .d.ts source. |
 | `--help` | `-h` | Output usage information. |
-| `--logLevel [level]` | `-L [level]` | Log level (error, warn, info, verbose, debug) (defaults to "info"). |
+| `--logLevel [level]` | `-L [level]` | Log level (`error`, `warn`, `info`, `verbose`, `debug`) (defaults to "info"). |
 | `--output [file]` | `-o [file]` | Overrides recommended output target to a custom one (defaults to "index.d.ts"). |
-| `--shake` | Basic tree-shaking for modules. (off (default), exportOnly, allImports). Drops modules not referenced by entry. exportOnly only keeps modules which are referenced with the export from ... keyowrd. |
+| `--shake` | `-s` | Basic tree-shaking for modules. (`off` (default), `exportOnly`, `allImports`). `allImports` drops modules not referenced by the entry module. `exportOnly` only keeps modules which are referenced with the `export from ...` keyword. |
 | `--root [path]` | `-r [path]` | NPM package directory containing package.json (defaults to current working directory). |
 | `--tmp [path]` | `-t [path]` | Directory for storing temporary information (defaults to OS-specific temporary directory). Note that tool completely deletes this folder once finished. |
 | `--tsc [options]` | `-c [options]` | Passed through additional TSC options (defaults to ""). Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes **and start with a space** (work-around for a bug in argument parsing dependency of _npm-dts_). |

@@ -5,7 +5,7 @@ import * as npmRun from 'npm-run'
 import {join, relative, resolve, dirname} from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
-import {Cli, ECliArgument, INpmDtsArgs} from './cli'
+import {Cli, ECliArgument, EShakeOptions, INpmDtsArgs} from './cli'
 import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
 import * as fs from 'fs'
 
@@ -243,17 +243,10 @@ export class Generator extends Cli {
   /**
    * Checks how and if tree-shaking should be applied
    */
-  private getShake(): 'off' | 'exportOnly' | 'allImports' {
-    const shake = this.getArgument(ECliArgument.shake) as
-      | undefined
-      | 'off'
-      | 'exportOnly'
-      | 'allImports'
-    if (shake === undefined) return 'off'
-    if (shake === 'exportOnly' || shake === 'allImports' || shake === 'off')
-      return shake
-    error(`Unknown value for shake "${shake}"`)
-    if (shake === undefined) return 'off'
+  private getShake(): EShakeOptions {
+    const shake = this.getArgument(ECliArgument.shake) as EShakeOptions
+    if (EShakeOptions[shake]) return shake
+    return EShakeOptions.off
   }
 
   /**

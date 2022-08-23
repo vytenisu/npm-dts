@@ -1,6 +1,6 @@
 import * as args from 'args'
 import * as path from 'path'
-import { ELogLevel } from './log'
+import {ELogLevel} from './log'
 
 /**
  * CLI argument names
@@ -65,6 +65,18 @@ export enum ECliArgument {
   shake = 'shake',
 }
 
+/** options for the --shake argument */
+export enum EShakeOptions {
+  /** dont shake (default) */
+  off = 'off',
+
+  /** remove everything but exported modules */
+  exportOnly = 'exportOnly',
+
+  /** only keep modules that are referenced by the entry module */
+  allImports = 'allImports',
+}
+
 /**
  * Configuration structure for generating an aggregated dts file
  */
@@ -112,7 +124,7 @@ export interface INpmDtsArgs {
   /**
    * Basic tree-shaking on module level
    */
-  shake?: 'off' | 'exportOnly' | 'allImports'
+  shake?: EShakeOptions
 
   /**
    * Output file path (relative to root)
@@ -157,7 +169,7 @@ export class Cli {
     logLevel: ELogLevel.info,
     noAlias: false,
     force: false,
-    shake: 'off',
+    shake: EShakeOptions.off,
     output: 'index.d.ts',
     template: undefined,
     testMode: false,
@@ -214,8 +226,8 @@ export class Cli {
           this.args.force,
         )
         .option(
-          'shake',
-          'Basic tree-shaking for modules. (off (default), exportOnly, allImports). Drops modules not referenced by entry. exportOnly only keeps modules which are referenced with the export from ... keyowrd.',
+          ['s', 'shake'],
+          'Basic tree-shaking for modules. (off (default), exportOnly, allImports). allImports drops modules not referenced by entry. exportOnly only keeps modules which are referenced with the export from ... keyword.',
           this.args.shake,
         )
         .option(
@@ -233,7 +245,7 @@ export class Cli {
           'Configures npm-dts for self-test',
           this.args.testMode,
         )
-        .command('generate', 'Start generation', (name: any, sub: any, options: any) => {
+        .command('generate', 'Start generation', (name, sub, options) => {
           this.launched = true
           this.storeArguments(options)
         })
