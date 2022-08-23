@@ -4,84 +4,45 @@ import * as path from 'path'
 
 describe('Default behavior', () => {
   const scriptPath = path.resolve(__dirname, '..', '..', 'cli.js')
-  const projectPath = path.resolve(__dirname, '..', 'sources', 'default')
-  const jsProjectPath = path.resolve(__dirname, '..', 'sources', 'js')
-  const customOutput = 'test.d.ts'
-  const customOutputNoAlias = 'testNoAlias.d.ts'
 
-  const dtsPath = path.resolve(
-    __dirname,
-    '..',
-    'sources',
-    'default',
-    'index.d.ts',
-  )
-
-  const customDtsPath = path.resolve(
-    __dirname,
-    '..',
-    'sources',
-    'default',
-    customOutput,
-  )
-  const customDtsPathNoAlias = path.resolve(
-    __dirname,
-    '..',
-    'sources',
-    'default',
-    customOutputNoAlias,
-  )
-
-  const jsDtsPath = path.resolve(__dirname, '..', 'sources', 'js', 'index.d.ts')
-
-  let source: string
-  let customDtsSource: string
-  let customDtsSourceNoAlias: string
-  let jsSource: string
-
-  beforeAll(() => {
-    try {
-      unlinkSync(dtsPath)
-    } catch (e) {
-      // NOT NEEDED
-    }
-
-    exec(
-      `node "${scriptPath}" -m -r "${projectPath}" -c " -p tsconfig.test.json" generate`,
-    )
-
-    exec(
-      `node "${scriptPath}" -m -r "${projectPath}" --addAlias true -c " -p tsconfig.test.json" -o ${customOutput} generate`,
-    )
-
-    exec(
-      `node "${scriptPath}" -m -r "${projectPath}" --template "declare const myMod: typeof import('{0}').default" --addAlias false -c " -p tsconfig.test.json" -o ${customOutputNoAlias} generate`,
-    )
-
-    exec(
-      `node "${scriptPath}" -m -r "${jsProjectPath}" -c " -p tsconfig.test.json" -e index.js generate`,
-    )
-
-    source = readFileSync(dtsPath, {encoding: 'utf8'})
-    customDtsSource = readFileSync(customDtsPath, {encoding: 'utf8'})
-    customDtsSourceNoAlias = readFileSync(customDtsPathNoAlias, {
-      encoding: 'utf8',
-    })
-    jsSource = readFileSync(jsDtsPath, {encoding: 'utf8'})
-  })
-
-  afterAll(() => {
+  function getSource(
+    args: string,
+    expectedDtsFileName: string,
+    project: 'js' | 'default',
+  ) {
+    const root = path.resolve(__dirname, '..', 'sources', project)
+    const dtsPath = path.resolve(root, expectedDtsFileName)
+    const cmd = `node "${scriptPath}" -m -r "${root}" -c " -p tsconfig.test.json" ${args} generate`
+    exec(cmd)
+    const source = readFileSync(dtsPath, {encoding: 'utf8'})
     unlinkSync(dtsPath)
-    unlinkSync(customDtsPath)
-    unlinkSync(customDtsPathNoAlias)
-    unlinkSync(jsDtsPath)
-  })
+    return source
+  }
+
+  const standard = getSource('', 'index.d.ts', 'default')
+  const customDtsSource = getSource(
+    `--addAlias true -o "test.d.ts"`,
+    'test.d.ts',
+    'default',
+  )
+  const customDtsSourceNoAliasTemplate = getSource(
+    `--template "declare const myMod: typeof import('{0}').default" --addAlias false`,
+    'index.d.ts',
+    'default',
+  )
+  const shakeAllImports = getSource(
+    `--shake allImports`,
+    'index.d.ts',
+    'default',
+  )
+
+  const jsSource = getSource('-e index.js', 'index.d.ts', 'js')
 
   it('exports all TS classes', () => {
     const classes = ['A', 'B', 'C']
 
     classes.forEach(cls => {
-      expect(source.includes(`export class ${cls}`)).toBeTruthy()
+      expect(standard.includes(`export class ${cls}`)).toBeTruthy()
     })
   })
 
@@ -97,7 +58,7 @@ describe('Default behavior', () => {
     const interfaces = ['IText']
 
     interfaces.forEach(int => {
-      expect(source.includes(`export type ${int}`)).toBeTruthy()
+      expect(standard.includes(`export type ${int}`)).toBeTruthy()
     })
   })
 
@@ -105,27 +66,27 @@ describe('Default behavior', () => {
     const interfaces = ['ISuggestedText', 'ASchema']
 
     interfaces.forEach(int => {
-      expect(source.includes(`export interface ${int}`)).toBeTruthy()
+      expect(standard.includes(`export interface ${int}`)).toBeTruthy()
     })
   })
 
   it('does not leave relative paths', () => {
-    expect(source.includes("from '.")).toBeFalsy()
+    expect(standard.includes("from '.")).toBeFalsy()
     expect(jsSource.includes("from '.")).toBeFalsy()
-    expect(source.includes("import('.")).toBeFalsy()
+    expect(standard.includes("import('.")).toBeFalsy()
     expect(jsSource.includes("import('.")).toBeFalsy()
   })
 
   it('does not touch 3rd party module imports', () => {
-    expect(source.includes("'winston'")).toBeTruthy()
+    expect(standard.includes("'winston'")).toBeTruthy()
   })
 
   it('works correctly when index.ts is used', () => {
     expect(
-      source.includes("from 'test-default/test/sources/default/src/c/index'"),
+      standard.includes("from 'test-default/test/sources/default/src/c/index'"),
     ).toBeTruthy()
     expect(
-      source.includes(
+      standard.includes(
         "declare module 'test-default/test/sources/default/src/c/index'",
       ),
     ).toBeTruthy()
@@ -136,13 +97,13 @@ describe('Default behavior', () => {
 
     modules.forEach(m => {
       expect(
-        source.includes(
+        standard.includes(
           `declare module 'test-default/test/sources/default/src/${m.toLowerCase()}'`,
         ),
       ).toBeTruthy()
 
       expect(
-        source.includes(
+        standard.includes(
           `from 'test-default/test/sources/default/src/${m.toLowerCase()}'`,
         ),
       ).toBeTruthy()
@@ -151,38 +112,47 @@ describe('Default behavior', () => {
 
   it('works correctly when module has a dot in its name', () => {
     expect(
-      source.includes(
+      standard.includes(
         "declare module 'test-default/test/sources/default/src/a.schema'",
       ),
     ).toBeTruthy()
 
     expect(
-      source.includes("from 'test-default/test/sources/default/src/a.schema'"),
+      standard.includes(
+        "from 'test-default/test/sources/default/src/a.schema'",
+      ),
     ).toBeTruthy()
   })
 
   it('exports main NPM package module', () => {
-    expect(source.includes("declare module 'test-default'")).toBeTruthy()
+    expect(standard.includes("declare module 'test-default'")).toBeTruthy()
     expect(jsSource.includes("declare module 'test-js'")).toBeTruthy()
   })
 
   it('exports entry point under module name', () => {
-    expect(source.includes("require('test-default/index')")).toBeTruthy()
+    expect(standard.includes("require('test-default/index')")).toBeTruthy()
     expect(jsSource.includes("require('test-js/index')")).toBeTruthy()
   })
 
   it('handles the --addAlias flag', () => {
-    expect(source.includes('export = main;')).toBeTruthy()
+    expect(standard.includes('export = main;')).toBeTruthy()
     expect(customDtsSource.includes('export = main;')).toBeTruthy()
-    expect(customDtsSourceNoAlias.includes('export = main;')).toBeFalsy()
+    expect(
+      customDtsSourceNoAliasTemplate.includes('export = main;'),
+    ).toBeFalsy()
   })
 
   it('insert templates', () => {
     expect(
-      customDtsSourceNoAlias.includes(
+      customDtsSourceNoAliasTemplate.includes(
         "declare const myMod: typeof import('test-default/index').default",
       ),
     ).toBeTruthy()
+  })
+
+  it('shake with the proper strategy', () => {
+    expect(standard.includes('ASchema')).toBeTruthy()
+    expect(shakeAllImports.includes('ASchema')).toBeFalsy()
   })
 
   it('re-exports JS modules', () => {
@@ -193,6 +163,6 @@ describe('Default behavior', () => {
   })
 
   it('allows to customize output target', () => {
-    expect(source).toBe(customDtsSource)
+    expect(standard).toBe(customDtsSource)
   })
 })
