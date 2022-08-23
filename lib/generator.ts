@@ -16,7 +16,9 @@ const MKDIR_RETRIES = 5
  */
 export class Generator extends Cli {
   private packageInfo: any
-  private moduleNames: string[]
+  private modules = new Map<string, string>()
+  private shakenModules = new Map<string, string>()
+  private shakeStrategy: (lines: string[]) => string[]
   private throwErrors: boolean
   private cacheContentEmptied: boolean = true
 
@@ -488,9 +490,7 @@ export class Generator extends Cli {
   /**
    * Loads generated per-file declaration files
    */
-  private loadTypings() {
-    const result: IDeclarationMap = {}
-
+  private loadModules() {
     const declarationFiles = this.getDeclarationFiles()
 
     verbose('Loading declaration files and mapping to modules...')
@@ -498,7 +498,8 @@ export class Generator extends Cli {
       const moduleName = this.convertPathToModule(file)
 
       try {
-        result[moduleName] = readFileSync(file, {encoding: 'utf8'})
+        const fileSource = readFileSync(file, {encoding: 'utf8'})
+        this.modules.set(moduleName, fileSource)
       } catch (e) {
         error(`Could not load declaration file '${file}'!`)
         this.showDebugError(e)
@@ -507,7 +508,6 @@ export class Generator extends Cli {
     })
 
     verbose('Loaded declaration files and mapped to modules!')
-    return result
   }
 
   private resolveImportSourcesAtLine(
@@ -540,10 +540,16 @@ export class Generator extends Cli {
 
   /**
    * Alters import sources to avoid relative addresses and default index usage
-   * @param source import source to be resolved
-   * @param moduleName name of module containing import
    */
-  private resolveImportSources(source: string, moduleName: string) {
+  private normalizeImports() {
+    this.modules.forEach((fileSource, moduleName) => {
+      fileSource = fileSource.replace(/declare /g, '')
+      fileSource = this.resolveImportSourcesAtFile(fileSource, moduleName)
+      this.modules.set(moduleName, fileSource)
+    })
+  }
+
+  private resolveImportSourcesAtFile(source: string, moduleName: string) {
     let lines = this.sourceLines(source)
 
     lines = lines.map(line => {
@@ -576,88 +582,73 @@ export class Generator extends Cli {
     return lines
   }
 
-  private findDependencies(
-    typings: IDeclarationMap,
-    moduleName: string,
-    shakenTypings: Set<string>,
-    filter: 'exportOnly' | 'allImports',
-  ): void {
-    const current = typings[moduleName]
-    if (current === undefined) {
+  private needToShake(): boolean {
+    const shake = this.getShake()
+    if (shake === EShakeOptions.off) return false
+    return true
+  }
+
+  private shake(): void {
+    const shake = this.getShake()
+
+    verbose(`Shaking typeings using the ${shake} strategy.`)
+
+    this.shakeStrategy = shakeStrategies[shake]
+    this.recursivelyAddShakenModuleNames(this.getMain())
+
+    this.modules = new Map(this.shakenModules)
+  }
+
+  private recursivelyAddShakenModuleNames(moduleName: string): void {
+    const fileSource = this.modules.get(moduleName)
+    if (fileSource === undefined) {
       warn(`no typings for "${moduleName}"`)
       return
     }
-    shakenTypings.add(moduleName)
-    const lines = this.sourceLines(current)
-    const refs =
-      filter === 'allImports'
-        ? this.findAllImportedRefs(lines)
-        : this.findExportedRefsOnly(lines)
-    verbose(`"${moduleName}" references ${JSON.stringify(refs)}`)
+    this.shakenModules.set(moduleName, fileSource)
 
-    for (const ref of refs) {
-      if (shakenTypings.has(ref)) continue
-      this.findDependencies(typings, ref, shakenTypings, filter)
+    const lines = this.sourceLines(fileSource)
+    const referencedModules = this.shakeStrategy(lines)
+
+    verbose(`"${moduleName}" references ${JSON.stringify(referencedModules)}`)
+
+    for (const referencedModule of referencedModules) {
+      if (this.shakenModules.has(referencedModule)) continue
+      this.recursivelyAddShakenModuleNames(referencedModule)
     }
-  }
-
-  private findExportedRefsOnly(lines: string[]) {
-    const exports = /export .*? from ['"]([^'"]+)['"]/
-    const refs = lines.map(l => l.match(exports))
-    return refs.filter(m => m !== null).map(m => m[1])
-  }
-
-  private findAllImportedRefs(lines: string[]) {
-    const staticImports = /from ['"]([^'"]+)['"]/
-    const inlineImport = /import\(['"]([^'"]+)['"]\)/
-    const refs = [
-      ...lines.map(l => l.match(staticImports)),
-      ...lines.map(l => l.match(inlineImport)),
-    ]
-    return refs.filter(m => m !== null).map(m => m[1])
   }
 
   /**
    * Combines typings into a single declaration source
    */
   private async combineTypings() {
-    let typings = this.loadTypings()
+    this.loadModules()
     await this.clearTempDir()
-
-    this.moduleNames = Object.keys(typings)
 
     verbose('Combining typings into single file...')
 
-    Object.entries(typings).forEach(([moduleName, fileSource]) => {
-      fileSource = fileSource.replace(/declare /g, '')
-      fileSource = this.resolveImportSources(fileSource, moduleName)
-      typings[moduleName] = fileSource
-    })
+    this.normalizeImports()
 
-    const mainFile = this.getMain()
-    const shake = this.getShake()
+    if (this.needToShake()) this.shake()
 
-    if (shake !== 'off') {
-      verbose(`Shaking typeings using the ${shake} strategy.`)
-      const referenced = new Set<string>()
-      this.findDependencies(typings, mainFile, referenced, shake)
-      const shakenTypings = Object.fromEntries(
-        Array.from(referenced).map(ref => [ref, typings[ref]]),
-      )
-      typings = shakenTypings
-    }
+    const result = this.createOutFile()
 
+    verbose('Combined typings into a single file!')
+
+    return result
+  }
+
+  private createOutFile() {
     const sourceParts: string[] = []
-    Object.entries(typings).forEach(([moduleName, fileSource]) => {
+    this.modules.forEach((fileSource, moduleName) => {
       sourceParts.push(
-        `declare module '${moduleName}' {\n${(fileSource as string).replace(
+        `declare module '${moduleName}' {\n${fileSource.replace(
           /^./gm,
           '  $&',
         )}\n}`,
       )
     })
 
-    verbose('Combined typings into a single file!')
     return sourceParts.join('\n')
   }
 
@@ -666,7 +657,7 @@ export class Generator extends Cli {
    * @param moduleName name of module to be checked
    */
   private moduleExists(moduleName: string) {
-    return this.moduleNames.includes(moduleName)
+    return this.modules.has(moduleName)
   }
 
   /**
@@ -771,11 +762,24 @@ export class Generator extends Cli {
   }
 }
 
-/**
- * Map of modules and their declarations
- */
-export interface IDeclarationMap {
-  [moduleNames: string]: string
+const shakeStrategies = {
+  [EShakeOptions.off]: (lines: string[]) => lines,
+
+  [EShakeOptions.allImports]: (lines: string[]) => {
+    const staticImports = /from ['"]([^'"]+)['"]/
+    const inlineImport = /import\(['"]([^'"]+)['"]\)/
+    const refs = [
+      ...lines.map(l => l.match(staticImports)),
+      ...lines.map(l => l.match(inlineImport)),
+    ]
+    return refs.filter(m => m !== null).map(m => m[1])
+  },
+
+  [EShakeOptions.exportOnly]: (lines: string[]) => {
+    const exports = /export .*? from ['"]([^'"]+)['"]/
+    const refs = lines.map(l => l.match(exports))
+    return refs.filter(m => m !== null).map(m => m[1])
+  },
 }
 
 /**
