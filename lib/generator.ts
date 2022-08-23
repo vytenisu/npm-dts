@@ -769,7 +769,7 @@ const shakeStrategies = {
     return refs.filter(match => match !== null).map(match => match[2])
   },
 
-  [EShakeOptions.exportOnly]: (lines: string[]) => {
+  [EShakeOptions.exportedOnly]: (lines: string[]) => {
     const exports = /export .*? from ['"]([^'"]+)['"]/
     const refs = lines.map(l => l.match(exports))
     return refs.filter(m => m !== null).map(m => m[1])
