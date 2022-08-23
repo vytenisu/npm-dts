@@ -55,7 +55,7 @@ describe('Default behavior', () => {
     )
 
     exec(
-      `node "${scriptPath}" -m -r "${projectPath}" --addAlias false -c " -p tsconfig.test.json" -o ${customOutputNoAlias} generate`,
+      `node "${scriptPath}" -m -r "${projectPath}" --template "declare const myMod: typeof import('{0}').default" --addAlias false -c " -p tsconfig.test.json" -o ${customOutputNoAlias} generate`,
     )
 
     exec(
@@ -175,6 +175,14 @@ describe('Default behavior', () => {
     expect(source.includes('export = main;')).toBeTruthy()
     expect(customDtsSource.includes('export = main;')).toBeTruthy()
     expect(customDtsSourceNoAlias.includes('export = main;')).toBeFalsy()
+  })
+
+  it('insert templates', () => {
+    expect(
+      customDtsSourceNoAlias.includes(
+        "declare const myMod: typeof import('test-default/index').default",
+      ),
+    ).toBeTruthy()
   })
 
   it('re-exports JS modules', () => {
