@@ -7,6 +7,7 @@ describe('Default behavior', () => {
   const projectPath = path.resolve(__dirname, '..', 'sources', 'default')
   const jsProjectPath = path.resolve(__dirname, '..', 'sources', 'js')
   const customOutput = 'test.d.ts'
+  const customOutputNoAlias = 'testNoAlias.d.ts'
 
   const dtsPath = path.resolve(
     __dirname,
@@ -23,11 +24,19 @@ describe('Default behavior', () => {
     'default',
     customOutput,
   )
+  const customDtsPathNoAlias = path.resolve(
+    __dirname,
+    '..',
+    'sources',
+    'default',
+    customOutputNoAlias,
+  )
 
   const jsDtsPath = path.resolve(__dirname, '..', 'sources', 'js', 'index.d.ts')
 
   let source: string
   let customDtsSource: string
+  let customDtsSourceNoAlias: string
   let jsSource: string
 
   beforeAll(() => {
@@ -42,7 +51,11 @@ describe('Default behavior', () => {
     )
 
     exec(
-      `node "${scriptPath}" -m -r "${projectPath}" -c " -p tsconfig.test.json" -o ${customOutput} generate`,
+      `node "${scriptPath}" -m -r "${projectPath}" --addAlias true -c " -p tsconfig.test.json" -o ${customOutput} generate`,
+    )
+
+    exec(
+      `node "${scriptPath}" -m -r "${projectPath}" --addAlias false -c " -p tsconfig.test.json" -o ${customOutputNoAlias} generate`,
     )
 
     exec(
@@ -51,12 +64,16 @@ describe('Default behavior', () => {
 
     source = readFileSync(dtsPath, {encoding: 'utf8'})
     customDtsSource = readFileSync(customDtsPath, {encoding: 'utf8'})
+    customDtsSourceNoAlias = readFileSync(customDtsPathNoAlias, {
+      encoding: 'utf8',
+    })
     jsSource = readFileSync(jsDtsPath, {encoding: 'utf8'})
   })
 
   afterAll(() => {
     unlinkSync(dtsPath)
     unlinkSync(customDtsPath)
+    unlinkSync(customDtsPathNoAlias)
     unlinkSync(jsDtsPath)
   })
 
@@ -152,6 +169,12 @@ describe('Default behavior', () => {
   it('exports entry point under module name', () => {
     expect(source.includes("require('test-default/index')")).toBeTruthy()
     expect(jsSource.includes("require('test-js/index')")).toBeTruthy()
+  })
+
+  it('handles the --addAlias flag', () => {
+    expect(source.includes('export = main;')).toBeTruthy()
+    expect(customDtsSource.includes('export = main;')).toBeTruthy()
+    expect(customDtsSourceNoAlias.includes('export = main;')).toBeFalsy()
   })
 
   it('re-exports JS modules', () => {

@@ -49,10 +49,10 @@ export enum ECliArgument {
   testMode = 'testMode',
 
   /**
-   * Flag which forces not to add an alias for the main NPM
+   * Flag which enables/disable adding an alias for the main NPM
    * package file to the generated .d.ts source
    */
-  noAlias = 'noAlias',
+  addAlias = 'addAlias',
 
   /**
    * Flag which forces attempting generation at least partially despite errors
@@ -112,9 +112,9 @@ export interface INpmDtsArgs {
   logLevel?: ELogLevel
 
   /**
-   * Don't add an alias for the main NPM package file to the generated .d.ts source
+   * Add an alias for the main NPM package file to the generated .d.ts source
    */
-  noAlias?: boolean
+  addAlias?: 'true' | 'false'
 
   /**
    * Attempts to at least partially generate typings ignoring non-critical errors
@@ -167,7 +167,7 @@ export class Cli {
     tmp: '<TEMP>',
     tsc: '',
     logLevel: ELogLevel.info,
-    noAlias: false,
+    addAlias: 'true',
     force: false,
     shake: EShakeOptions.off,
     output: 'index.d.ts',
@@ -216,9 +216,9 @@ export class Cli {
           this.args.logLevel,
         )
         .option(
-          'noAlias',
-          'Don\'t add an alias for the main NPM package file to the generated .d.ts source',
-          this.args.noAlias,
+          'addAlias',
+          'Add an alias for the main NPM package file to the generated .d.ts source (true, false) - default true',
+          this.args.addAlias,
         )
         .option(
           ['f', 'force'],

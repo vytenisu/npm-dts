@@ -230,7 +230,7 @@ export class Generator extends Cli {
    * added to the generated .d.ts source
    */
   private noAlias(): boolean {
-    return this.getArgument(ECliArgument.noAlias) as boolean
+    return this.getArgument(ECliArgument.addAlias) === 'false'
   }
 
   /**
