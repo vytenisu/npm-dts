@@ -11,6 +11,9 @@ import * as fs from 'fs'
 
 const MKDIR_RETRIES = 5
 
+const REG_STATIC_IMPORT = /(from ['"])([^'"]+)(['"])/
+const REG_INLINE_IMPORT = /(import\(['"])([^'"]+)(['"]\))/
+
 /**
  * Logic for generating aggregated typings for NPM module
  */
@@ -554,13 +557,13 @@ export class Generator extends Cli {
 
     lines = lines.map(line => {
       line = this.resolveImportSourcesAtLine(
-        /(from ['"])([^'"]+)(['"])/,
+        REG_STATIC_IMPORT,
         line,
         moduleName,
       )
 
       line = this.resolveImportSourcesAtLine(
-        /(import\(['"])([^'"]+)(['"]\))/,
+        REG_INLINE_IMPORT,
         line,
         moduleName,
       )
@@ -591,10 +594,10 @@ export class Generator extends Cli {
   private shake(): void {
     const shake = this.getShake()
 
-    verbose(`Shaking typeings using the ${shake} strategy.`)
+    verbose(`Shaking typings using the ${shake} strategy.`)
 
     this.shakeStrategy = shakeStrategies[shake]
-    this.recursivelyAddShakenModuleNames(this.getMain())
+    this.recursivelyAddShakenModuleNames(this.getMainModule())
 
     this.modules = new Map(this.shakenModules)
   }
@@ -661,7 +664,7 @@ export class Generator extends Cli {
   }
 
   /**
-   * Adds an  alias for the main NPM package file to the
+   * Adds an alias for the main NPM package file to the
    * generated .d.ts source
    * @param source generated .d.ts declaration source so far
    */
@@ -669,11 +672,11 @@ export class Generator extends Cli {
     verbose('Adding alias for main file of the package...')
 
     const packageDetails = this.getPackageDetails()
-    const mainFile = this.getMain()
+    const mainModule = this.getMainModule()
 
     source +=
       `\ndeclare module '${packageDetails.name}' {\n` +
-      `  import main = require('${mainFile}');\n` +
+      `  import main = require('${mainModule}');\n` +
       '  export = main;\n' +
       '}'
 
@@ -682,7 +685,7 @@ export class Generator extends Cli {
     return source
   }
 
-  private getMain() {
+  private getMainModule() {
     const entry = this.getEntry()
 
     if (!entry) {
@@ -766,13 +769,11 @@ const shakeStrategies = {
   [EShakeOptions.off]: (lines: string[]) => lines,
 
   [EShakeOptions.allImports]: (lines: string[]) => {
-    const staticImports = /from ['"]([^'"]+)['"]/
-    const inlineImport = /import\(['"]([^'"]+)['"]\)/
     const refs = [
-      ...lines.map(l => l.match(staticImports)),
-      ...lines.map(l => l.match(inlineImport)),
+      ...lines.map(line => line.match(REG_STATIC_IMPORT)),
+      ...lines.map(line => line.match(REG_INLINE_IMPORT)),
     ]
-    return refs.filter(m => m !== null).map(m => m[1])
+    return refs.filter(match => match !== null).map(match => match[2])
   },
 
   [EShakeOptions.exportOnly]: (lines: string[]) => {
