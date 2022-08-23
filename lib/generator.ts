@@ -214,7 +214,7 @@ export class Generator extends Cli {
   }
 
   /**
-   * Append this template where {0} is replaced with the name/path of the entry module.
+   * Append this template where {main-module} is replaced with the name/path of the entry module.
    */
   private getTemplate(): string | undefined {
     return this.getArgument(ECliArgument.template) as string | undefined
@@ -698,7 +698,7 @@ export class Generator extends Cli {
   }
 
   /**
-   * Append template where {0} is replaced with the name/path of the entry module.
+   * Append template where {main-module} is replaced with the name/path of the entry module.
    * @param source generated .d.ts declaration source so far
    */
   private appendTemplate(source: string) {
@@ -717,7 +717,7 @@ export class Generator extends Cli {
     })
 
     const tpl = this.getTemplate()
-    const appliedTemplate = tpl.replace('{0}', mainFile)
+    const appliedTemplate = tpl.replace('{main-module}', mainFile)
 
     source += '\n' + appliedTemplate + '\n'
 

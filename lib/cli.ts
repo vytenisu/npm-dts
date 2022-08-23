@@ -37,7 +37,7 @@ export enum ECliArgument {
   output = 'output',
 
   /**
-   * Append this template where {0} is replaced with the name/path of the entry module.
+   * Append this template where {main-module} is replaced with the name/path of the entry module.
    */
   template = 'template',
 
@@ -132,7 +132,7 @@ export interface INpmDtsArgs {
   output?: string
 
   /**
-   * Append this template where {0} is replaced with the name/path of the entry module.
+   * Append this template where {main-module} is replaced with the name/path of the entry module.
    */
   template?: string
 
@@ -237,7 +237,7 @@ export class Cli {
         )
         .option(
           'template',
-          'Append this template where {0} is replaced with the name/path of the entry module.',
+          'Append this template where {main-module} is replaced with the name/path of the entry module.',
           this.args.template,
         )
         .option(

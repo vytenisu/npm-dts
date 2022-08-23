@@ -26,7 +26,7 @@ describe('Default behavior', () => {
     'default',
   )
   const customDtsSourceNoAliasTemplate = getSource(
-    `--template "declare const myMod: typeof import('{0}').default" --addAlias false`,
+    `--template "declare const myMod: typeof import('{main-module}').default" --addAlias false`,
     'index.d.ts',
     'default',
   )

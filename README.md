@@ -53,7 +53,7 @@ npm-dts [options] generate
 |--------|-------|-------------|
 | `--entry [file]` | `-e [file]` | Allows changing main _src_ file from _index.ts_ to something else. It can also be declared as a path, relative to root. |
 | `--force` | `-f` | Ignores non-critical errors and attempts to at least partially generate typings (disabled by default). |
-| `--template` | | Append this template where `{0}` is replaced with the name/path of the entry module. |
+| `--template` | | Append this template where `{main-module}` is replaced with the name/path of the entry module. |
 | `--addAlias` | | Add an alias for the main NPM package file to the generated .d.ts source. (`true`, `false`) (defaults to "true") |
 | `--help` | `-h` | Output usage information. |
 | `--logLevel [level]` | `-L [level]` | Log level (`error`, `warn`, `info`, `verbose`, `debug`) (defaults to "info"). |
