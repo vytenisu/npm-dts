@@ -693,11 +693,14 @@ export class Generator extends Cli {
       throw new Error('No entry file is available!')
     }
 
-    const mainFile = this.convertPathToModule(resolve(this.getRoot(), entry), {
+    const mainModule = this.convertPathToModule(
+      resolve(this.getRoot(), entry),
+      {
       rootType: IBasePathType.root,
       noExistenceCheck: true,
-    })
-    return mainFile
+      },
+    )
+    return mainModule
   }
 
   /**
@@ -707,20 +710,10 @@ export class Generator extends Cli {
   private appendTemplate(source: string) {
     verbose('Adding template')
 
-    const entry = this.getEntry()
-
-    if (!entry) {
-      error('No entry file is available!')
-      throw new Error('No entry file is available!')
-    }
-
-    const mainFile = this.convertPathToModule(resolve(this.getRoot(), entry), {
-      rootType: IBasePathType.root,
-      noExistenceCheck: true,
-    })
-
+    const mainModule = this.getMainModule()
     const tpl = this.getTemplate()
-    const appliedTemplate = tpl.replace('{main-module}', mainFile)
+
+    const appliedTemplate = tpl.replace('{main-module}', mainModule)
 
     source += '\n' + appliedTemplate + '\n'
 
