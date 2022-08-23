@@ -74,7 +74,7 @@ export enum EShakeOptions {
   exportOnly = 'exportOnly',
 
   /** only keep modules that are referenced by the entry module */
-  allImports = 'allImports',
+  referencedOnly = 'referencedOnly',
 }
 
 /**
@@ -227,7 +227,7 @@ export class Cli {
         )
         .option(
           ['s', 'shake'],
-          'Basic tree-shaking for modules. (off (default), exportOnly, allImports). allImports drops modules not referenced by entry. exportOnly only keeps modules which are referenced with the export from ... keyword.',
+          'Basic tree-shaking for modules. (off (default), exportOnly, referencedOnly). referencedOnly drops modules not referenced by entry. exportOnly only keeps modules which are referenced with the export from ... keyword.',
           this.args.shake,
         )
         .option(

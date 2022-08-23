@@ -56,7 +56,7 @@ npm-dts [options] generate
 | `--help` | `-h` | Output usage information. |
 | `--logLevel [level]` | `-L [level]` | Log level (`error`, `warn`, `info`, `verbose`, `debug`) (defaults to "info"). |
 | `--output [file]` | `-o [file]` | Overrides recommended output target to a custom one (defaults to "index.d.ts"). |
-| `--shake` | `-s` | Basic tree-shaking for modules. (`off` (default), `exportOnly`, `allImports`). `allImports` drops modules not referenced by the entry module. `exportOnly` only keeps modules which are referenced with the `export from ...` keyword. |
+| `--shake` | `-s` | Basic tree-shaking for modules. (`off` (default), `exportOnly`, `referencedOnly`). `referencedOnly` drops modules not referenced by the entry module. `exportOnly` only keeps modules which are referenced with the `export from ...` keyword. |
 | `--root [path]` | `-r [path]` | NPM package directory containing package.json (defaults to current working directory). |
 | `--tmp [path]` | `-t [path]` | Directory for storing temporary information (defaults to OS-specific temporary directory). Note that tool completely deletes this folder once finished. |
 | `--tsc [options]` | `-c [options]` | Passed through additional TSC options (defaults to ""). Note that they are not validated or checked for suitability. When passing through CLI it is recommended to surround arguments in quotes **and start with a space** (work-around for a bug in argument parsing dependency of _npm-dts_). |

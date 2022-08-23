@@ -696,8 +696,8 @@ export class Generator extends Cli {
     const mainModule = this.convertPathToModule(
       resolve(this.getRoot(), entry),
       {
-      rootType: IBasePathType.root,
-      noExistenceCheck: true,
+        rootType: IBasePathType.root,
+        noExistenceCheck: true,
       },
     )
     return mainModule
@@ -761,7 +761,7 @@ export class Generator extends Cli {
 const shakeStrategies = {
   [EShakeOptions.off]: (lines: string[]) => lines,
 
-  [EShakeOptions.allImports]: (lines: string[]) => {
+  [EShakeOptions.referencedOnly]: (lines: string[]) => {
     const refs = [
       ...lines.map(line => line.match(REG_STATIC_IMPORT)),
       ...lines.map(line => line.match(REG_INLINE_IMPORT)),

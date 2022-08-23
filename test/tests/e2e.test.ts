@@ -30,8 +30,8 @@ describe('Default behavior', () => {
     'index.d.ts',
     'default',
   )
-  const shakeAllImports = getSource(
-    `--shake allImports`,
+  const shakeReferencedOnly = getSource(
+    `--shake referencedOnly`,
     'index.d.ts',
     'default',
   )
@@ -152,7 +152,7 @@ describe('Default behavior', () => {
 
   it('shake with the proper strategy', () => {
     expect(standard.includes('ASchema')).toBeTruthy()
-    expect(shakeAllImports.includes('ASchema')).toBeFalsy()
+    expect(shakeReferencedOnly.includes('ASchema')).toBeFalsy()
   })
 
   it('re-exports JS modules', () => {
