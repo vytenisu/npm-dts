@@ -553,7 +553,7 @@ export class Generator extends Cli {
   }
 
   private resolveImportSourcesAtFile(source: string, moduleName: string) {
-    let lines = this.sourceLines(source)
+    let lines = this.splitSourceToLines(source)
 
     lines = lines.map(line => {
       line = this.resolveImportSourcesAtLine(
@@ -576,7 +576,7 @@ export class Generator extends Cli {
     return source
   }
 
-  private sourceLines(source: string) {
+  private splitSourceToLines(source: string) {
     source = source.replace(/\r\n/g, '\n')
     source = source.replace(/\n\r/g, '\n')
     source = source.replace(/\r/g, '\n')
@@ -610,7 +610,7 @@ export class Generator extends Cli {
     }
     this.shakenModules.set(moduleName, fileSource)
 
-    const lines = this.sourceLines(fileSource)
+    const lines = this.splitSourceToLines(fileSource)
     const referencedModules = this.shakeStrategy(lines)
 
     verbose(`"${moduleName}" references ${JSON.stringify(referencedModules)}`)
