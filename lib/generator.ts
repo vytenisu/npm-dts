@@ -5,7 +5,13 @@ import * as npmRun from 'npm-run'
 import {join, relative, resolve, dirname} from 'path'
 import * as rm from 'rimraf'
 import * as tmp from 'tmp'
-import {Cli, ECliArgument, EShakeOptions, INpmDtsArgs} from './cli'
+import {
+  Cli,
+  EAliasPlaceholder,
+  ECliArgument,
+  EShakeOptions,
+  INpmDtsArgs,
+} from './cli'
 import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
 import * as fs from 'fs'
 
@@ -22,6 +28,7 @@ export class Generator extends Cli {
   private modules = new Map<string, string>()
   private shakenModules = new Map<string, string>()
   private shakeStrategy: (lines: string[]) => string[]
+  private source = ''
   private throwErrors: boolean
   private cacheContentEmptied: boolean = true
 
@@ -138,7 +145,7 @@ export class Generator extends Cli {
         }
 
         if (!this.cacheContentEmptied) {
-          await this.clearTempDir()
+          await this.clearTypings()
         }
 
         exception = e
@@ -177,10 +184,15 @@ export class Generator extends Cli {
    */
   private async _generate() {
     await this.generateTypings()
-    let source = await this.combineTypings()
-    if (this.addAlias()) source = this.appendAlias(source)
-    if (this.addTemplate()) source = this.appendTemplate(source)
-    await this.storeResult(source)
+    this.mapTypingsToModules()
+    await this.clearTypings()
+
+    this.transformModules()
+
+    this.joinModules()
+    this.appendAlias()
+
+    await this.writeOutputFile()
   }
 
   private getLogLevel(): ELogLevel {
@@ -217,14 +229,11 @@ export class Generator extends Cli {
   }
 
   /**
-   * Append this template where {main-module} is replaced with the name/path of the entry module.
+   * Gathers the template for the alias.
+   * Either the default or userProvided
    */
-  private getTemplate(): string | undefined {
-    return this.getArgument(ECliArgument.template) as string | undefined
-  }
-
-  private addTemplate(): boolean {
-    return this.getArgument(ECliArgument.template) !== undefined
+  private getAliasTemplate(): string | undefined {
+    return this.getArgument(ECliArgument.customAlias) as string
   }
 
   /**
@@ -235,14 +244,6 @@ export class Generator extends Cli {
   }
 
   /**
-   * Checks if an alias for the main NPM package file should be
-   * added to the generated .d.ts source
-   */
-  private addAlias(): boolean {
-    return this.getArgument(ECliArgument.addAlias) !== 'false'
-  }
-
-  /**
    * Checks if script is forced to attempt generation despite errors
    */
   private useForce(): boolean {
@@ -250,12 +251,24 @@ export class Generator extends Cli {
   }
 
   /**
-   * Checks how and if tree-shaking should be applied
+   * Gathers the tree-shaking strategy
    */
   private getShake(): EShakeOptions {
     const shake = this.getArgument(ECliArgument.shake) as EShakeOptions
     if (EShakeOptions[shake]) return shake
+    warn(
+      `Unknown --shake strategy "${shake}". Fallback to "${EShakeOptions.off}"`,
+    )
+    warn(
+      `Available --shake strategies are: ${JSON.stringify(
+        Object.keys(EShakeOptions),
+      )}`,
+    )
     return EShakeOptions.off
+  }
+
+  private needToShake(): boolean {
+    return this.getShake() !== EShakeOptions.off
   }
 
   /**
@@ -293,9 +306,9 @@ export class Generator extends Cli {
   }
 
   /**
-   * Removes TMP directory
+   * Clears per-file typings - Removes TMP directory
    */
-  private clearTempDir() {
+  private clearTypings() {
     const tmpDir = this.getTempDir()
     verbose('Cleaning up "tmp" directory...')
 
@@ -320,7 +333,7 @@ export class Generator extends Cli {
   private resetCacheDir() {
     verbose('Will now reset "tmp" directory...')
     return new Promise((done, fail) => {
-      this.clearTempDir().then(() => {
+      this.clearTypings().then(() => {
         this.makeTempDir().then(done, fail)
       }, fail)
     })
@@ -493,7 +506,7 @@ export class Generator extends Cli {
   /**
    * Loads generated per-file declaration files
    */
-  private loadModules() {
+  private mapTypingsToModules() {
     const declarationFiles = this.getDeclarationFiles()
 
     verbose('Loading declaration files and mapping to modules...')
@@ -541,12 +554,14 @@ export class Generator extends Cli {
     return line
   }
 
-  /**
-   * Alters import sources to avoid relative addresses and default index usage
-   */
-  private normalizeImports() {
+  private removeDeclareKeyword() {
     this.modules.forEach((fileSource, moduleName) => {
       fileSource = fileSource.replace(/declare /g, '')
+      this.modules.set(moduleName, fileSource)
+    })
+  }
+  private resolveImportSources() {
+    this.modules.forEach((fileSource, moduleName) => {
       fileSource = this.resolveImportSourcesAtFile(fileSource, moduleName)
       this.modules.set(moduleName, fileSource)
     })
@@ -585,12 +600,6 @@ export class Generator extends Cli {
     return lines
   }
 
-  private needToShake(): boolean {
-    const shake = this.getShake()
-    if (shake === EShakeOptions.off) return false
-    return true
-  }
-
   private shake(): void {
     const shake = this.getShake()
 
@@ -621,38 +630,36 @@ export class Generator extends Cli {
     }
   }
 
-  /**
-   * Combines typings into a single declaration source
-   */
-  private async combineTypings() {
-    this.loadModules()
-    await this.clearTempDir()
-
-    verbose('Combining typings into single file...')
-
-    this.normalizeImports()
+  private transformModules() {
+    verbose('Applying transformations to typings...')
+    this.removeDeclareKeyword()
+    this.resolveImportSources()
 
     if (this.needToShake()) this.shake()
 
-    const result = this.createOutFile()
-
-    verbose('Combined typings into a single file!')
-
-    return result
+    this.indentSources()
+    this.wrapModuleInDeclaration()
+    verbose('Applyied transformations to typings!')
   }
 
-  private createOutFile() {
-    const sourceParts: string[] = []
+  private joinModules() {
+    verbose('Combining typings into single file...')
+    this.source = Array.from(this.modules.values()).join('\n')
+    verbose('Combined typings into a single file!')
+  }
+
+  private indentSources() {
     this.modules.forEach((fileSource, moduleName) => {
-      sourceParts.push(
-        `declare module '${moduleName}' {\n${fileSource.replace(
-          /^./gm,
-          '  $&',
-        )}\n}`,
+      this.modules.set(moduleName, fileSource.replace(/^./gm, '  $&'))
+    })
+  }
+  private wrapModuleInDeclaration() {
+    this.modules.forEach((fileSource, moduleName) => {
+      this.modules.set(
+        moduleName,
+        `declare module '${moduleName}' {\n${fileSource}\n}`,
       )
     })
-
-    return sourceParts.join('\n')
   }
 
   /**
@@ -666,23 +673,19 @@ export class Generator extends Cli {
   /**
    * Adds an alias for the main NPM package file to the
    * generated .d.ts source
-   * @param source generated .d.ts declaration source so far
    */
-  private appendAlias(source: string) {
+  private appendAlias() {
     verbose('Adding alias for main file of the package...')
 
     const packageDetails = this.getPackageDetails()
     const mainModule = this.getMainModule()
+    const appliedTemplate = this.getAliasTemplate()
+      .replace('{' + EAliasPlaceholder.MainModule + '}', mainModule)
+      .replace('{' + EAliasPlaceholder.PackageName + '}', packageDetails.name)
 
-    source +=
-      `\ndeclare module '${packageDetails.name}' {\n` +
-      `  import main = require('${mainModule}');\n` +
-      '  export = main;\n' +
-      '}'
+    this.source += '\n' + appliedTemplate + '\n'
 
     verbose('Successfully created alias for main file!')
-
-    return source
   }
 
   private getMainModule() {
@@ -704,29 +707,9 @@ export class Generator extends Cli {
   }
 
   /**
-   * Append template where {main-module} is replaced with the name/path of the entry module.
-   * @param source generated .d.ts declaration source so far
-   */
-  private appendTemplate(source: string) {
-    verbose('Adding template')
-
-    const mainModule = this.getMainModule()
-    const tpl = this.getTemplate()
-
-    const appliedTemplate = tpl.replace('{main-module}', mainModule)
-
-    source += '\n' + appliedTemplate + '\n'
-
-    verbose('Successfully added template!')
-
-    return source
-  }
-
-  /**
    * Stores generated .d.ts declaration source into file
-   * @param source generated .d.ts source
    */
-  private async storeResult(source: string) {
+  private async writeOutputFile() {
     const output = this.getOutput()
     const root = this.getRoot()
     const file = resolve(root, output)
@@ -747,7 +730,7 @@ export class Generator extends Cli {
     verbose(`Storing typings into ${output} file...`)
 
     try {
-      writeFileSync(file, source, {encoding: 'utf8'})
+      writeFileSync(file, this.source, {encoding: 'utf8'})
     } catch (e) {
       error(`Failed to create ${output}!`)
       this.showDebugError(e)

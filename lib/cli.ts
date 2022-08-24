@@ -37,9 +37,9 @@ export enum ECliArgument {
   output = 'output',
 
   /**
-   * Append this template where {main-module} is replaced with the name/path of the entry module.
+   * Use the given template instead of the default alias.
    */
-  template = 'template',
+  customAlias = 'customAlias',
 
   /**
    * Flag which forces using own TSC as opposed to target TSC
@@ -47,12 +47,6 @@ export enum ECliArgument {
    * This is because it generates incorrect module names
    */
   testMode = 'testMode',
-
-  /**
-   * Flag which enables/disable adding an alias for the main NPM
-   * package file to the generated .d.ts source
-   */
-  addAlias = 'addAlias',
 
   /**
    * Flag which forces attempting generation at least partially despite errors
@@ -76,6 +70,19 @@ export enum EShakeOptions {
   /** only keep modules that are referenced by the entry module */
   referencedOnly = 'referencedOnly',
 }
+
+/** placeholders {@link DEFAULT_ALIAS} or {@link ECliArgument.customAlias} */
+export enum EAliasPlaceholder {
+  PackageName = 'package-name',
+  MainModule = 'main-module',
+}
+
+export const DEFAULT_ALIAS = `
+declare module '{${EAliasPlaceholder.PackageName}}' {
+  import main = require('{${EAliasPlaceholder.MainModule}}');
+  export = main;
+}
+`
 
 /**
  * Configuration structure for generating an aggregated dts file
@@ -112,11 +119,6 @@ export interface INpmDtsArgs {
   logLevel?: ELogLevel
 
   /**
-   * Add an alias for the main NPM package file to the generated .d.ts source
-   */
-  addAlias?: 'true' | 'false'
-
-  /**
    * Attempts to at least partially generate typings ignoring non-critical errors
    */
   force?: boolean
@@ -132,9 +134,9 @@ export interface INpmDtsArgs {
   output?: string
 
   /**
-   * Append this template where {main-module} is replaced with the name/path of the entry module.
+   * Use the given template instead of the default alias.
    */
-  template?: string
+  customAlias?: string
 
   /**
    * Flag which forces using own TSC as opposed to target TSC
@@ -167,11 +169,10 @@ export class Cli {
     tmp: '<TEMP>',
     tsc: '',
     logLevel: ELogLevel.info,
-    addAlias: 'true',
     force: false,
     shake: EShakeOptions.off,
     output: 'index.d.ts',
-    template: undefined,
+    customAlias: DEFAULT_ALIAS,
     testMode: false,
   }
 
@@ -216,11 +217,6 @@ export class Cli {
           this.args.logLevel,
         )
         .option(
-          'addAlias',
-          'Add an alias for the main NPM package file to the generated .d.ts source (true, false) - default true',
-          this.args.addAlias,
-        )
-        .option(
           ['f', 'force'],
           'Ignores non-critical errors and attempts to at least partially generate typings',
           this.args.force,
@@ -236,9 +232,9 @@ export class Cli {
           this.args.output,
         )
         .option(
-          'template',
-          'Append this template where {main-module} is replaced with the name/path of the entry module.',
-          this.args.template,
+          ['a', 'customAlias'],
+          'Instead of an alias, use the given template, where `{main-module}` is replaced with the name/path of the entry module and `{package-name}` is replaced with the name of the package.',
+          this.args.customAlias,
         )
         .option(
           ['m', 'testMode'],
