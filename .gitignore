@@ -1,6 +1,7 @@
 # Add any directories, files, or patterns you don't want to be tracked by version control
 .git
 node_modules
+index.d.ts
 test/**/*.d.ts
 dist
 cache
