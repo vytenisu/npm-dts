@@ -37,6 +37,11 @@ export enum ECliArgument {
   output = 'output',
 
   /**
+   * Use the given template instead of the default alias.
+   */
+  customAlias = 'customAlias',
+
+  /**
    * Flag which forces using own TSC as opposed to target TSC
    * This should only be used for testing npm-dts itself
    * This is because it generates incorrect module names
@@ -47,7 +52,34 @@ export enum ECliArgument {
    * Flag which forces attempting generation at least partially despite errors
    */
   force = 'force',
+
+  /**
+   * Basic tree-shaking on module level
+   */
+  shake = 'shake',
 }
+
+/** options for the --shake argument */
+export enum EShakeOptions {
+  /** dont shake (default) */
+  off = 'off',
+
+  /** only keep modules that are referenced by the entry module */
+  referencedOnly = 'referencedOnly',
+}
+
+/** placeholders {@link DEFAULT_ALIAS} or {@link ECliArgument.customAlias} */
+export enum EAliasPlaceholder {
+  PackageName = 'package-name',
+  MainModule = 'main-module',
+}
+
+export const DEFAULT_ALIAS = `
+declare module '{${EAliasPlaceholder.PackageName}}' {
+  import main = require('{${EAliasPlaceholder.MainModule}}');
+  export = main;
+}
+`
 
 /**
  * Configuration structure for generating an aggregated dts file
@@ -89,9 +121,19 @@ export interface INpmDtsArgs {
   force?: boolean
 
   /**
+   * Basic tree-shaking on module level
+   */
+  shake?: EShakeOptions
+
+  /**
    * Output file path (relative to root)
    */
   output?: string
+
+  /**
+   * Use the given template instead of the default alias.
+   */
+  customAlias?: string
 
   /**
    * Flag which forces using own TSC as opposed to target TSC
@@ -125,7 +167,9 @@ export class Cli {
     tsc: '',
     logLevel: ELogLevel.info,
     force: false,
+    shake: EShakeOptions.off,
     output: 'index.d.ts',
+    customAlias: DEFAULT_ALIAS,
     testMode: false,
   }
 
@@ -175,9 +219,19 @@ export class Cli {
           this.args.force,
         )
         .option(
+          ['s', 'shake'],
+          'Basic tree-shaking for modules. (off (default), referencedOnly). referencedOnly drops modules not referenced by the entry module.',
+          this.args.shake,
+        )
+        .option(
           ['o', 'output'],
           'Overrides recommended output target to a custom one',
           this.args.output,
+        )
+        .option(
+          ['a', 'customAlias'],
+          'Instead of an alias, use the given template, where `{main-module}` is replaced with the name/path of the entry module and `{package-name}` is replaced with the name of the package.',
+          this.args.customAlias,
         )
         .option(
           ['m', 'testMode'],
