@@ -266,15 +266,15 @@ export class Generator extends Cli {
     verbose('Cleaning up "tmp" directory...')
 
     return new Promise<void>((done, fail) => {
-      rimraf(tmpDir).then(rmError => {
+      rimraf(tmpDir).then(() => {
         this.cacheContentEmptied = true
         verbose('"tmp" directory was cleaned!')
         done()
-      }).catch((rmError) => {
+      }).catch(rmError => {
         error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
         this.showDebugError(rmError)
         fail()
-      });
+      })
     })
   }
 
