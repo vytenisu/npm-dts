@@ -1,13 +1,13 @@
 import {readdirSync, statSync, writeFileSync} from 'fs'
 import {readFileSync} from 'fs'
-import * as mkdir from 'mkdirp'
 import * as npmRun from 'npm-run'
 import {join, relative, resolve, dirname} from 'path'
-import * as rm from 'rimraf'
 import * as tmp from 'tmp'
 import {Cli, ECliArgument, INpmDtsArgs} from './cli'
 import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
 import * as fs from 'fs'
+import { mkdirp } from 'mkdirp'
+import { rimraf } from 'rimraf'
 
 const MKDIR_RETRIES = 5
 
@@ -233,7 +233,7 @@ export class Generator extends Cli {
     verbose('Preparing "tmp" directory...')
 
     return new Promise((done, fail) => {
-      mkdir(tmpDir)
+      mkdirp(tmpDir)
         .then(() => {
           this.cacheContentEmptied = false
           verbose('"tmp" directory was prepared!')
@@ -266,17 +266,15 @@ export class Generator extends Cli {
     verbose('Cleaning up "tmp" directory...')
 
     return new Promise<void>((done, fail) => {
-      rm(tmpDir, rmError => {
-        if (rmError) {
-          error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
-          this.showDebugError(rmError)
-          fail()
-        } else {
-          this.cacheContentEmptied = true
-          verbose('"tmp" directory was cleaned!')
-          done()
-        }
-      })
+      rimraf(tmpDir).then(rmError => {
+        this.cacheContentEmptied = true
+        verbose('"tmp" directory was cleaned!')
+        done()
+      }).catch((rmError) => {
+        error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
+        this.showDebugError(rmError)
+        fail()
+      });
     })
   }
 
@@ -623,7 +621,7 @@ export class Generator extends Cli {
     debug(`Creating output folder: "${folderPath}"...`)
 
     try {
-      await mkdir(folderPath)
+      await mkdirp(folderPath)
     } catch (mkdirError) {
       error(`Failed to create "${folderPath}"!`)
       this.showDebugError(mkdirError)
