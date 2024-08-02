@@ -1,9 +1,9 @@
 import {readdirSync, statSync, writeFileSync} from 'fs'
 import {readFileSync} from 'fs'
-import * as mkdir from 'mkdirp'
+import {mkdirp as mkdir} from 'mkdirp'
 import * as npmRun from 'npm-run'
 import {join, relative, resolve, dirname} from 'path'
-import * as rm from 'rimraf'
+import {rimraf as rm} from 'rimraf'
 import * as tmp from 'tmp'
 import {Cli, ECliArgument, INpmDtsArgs} from './cli'
 import {debug, ELogLevel, error, info, init, verbose, warn} from './log'
@@ -266,17 +266,17 @@ export class Generator extends Cli {
     verbose('Cleaning up "tmp" directory...')
 
     return new Promise<void>((done, fail) => {
-      rm(tmpDir, rmError => {
-        if (rmError) {
-          error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
-          this.showDebugError(rmError)
-          fail()
-        } else {
+      rm(tmpDir)
+        .then(() => {
           this.cacheContentEmptied = true
           verbose('"tmp" directory was cleaned!')
           done()
-        }
-      })
+        })
+        .catch(rmError => {
+          error(`Could not clean up "tmp" directory at "${tmpDir}"!`)
+          this.showDebugError(rmError)
+          fail()
+        })
     })
   }
 
