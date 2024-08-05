@@ -10,6 +10,14 @@ _TypeScript_ picks up _index.d.ts_ automatically.
 
 ---
 
+## Forks
+
+**[@htho/npm-dts](https://www.npmjs.com/package/@htho/npm-dts) by [Hauke Thorenz](https://www.npmjs.com/~htho)**:
+- Custom alias functionality (--customAlias)
+- Tree shaking (--shake)
+
+---
+
 ## Installation
 
 Local:
