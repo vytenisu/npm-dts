@@ -3,13 +3,17 @@
     "allowJs": true,
     "checkJs": true,
     "target": "ES5",
+    "module": "commonjs",
+    "esModuleInterop": false,
     "moduleResolution": "node",
     "lib": ["es2015", "es2017", "dom"],
     "sourceMap": true,
     "skipLibCheck": true,
     "noImplicitAny": true,
-    "noImplicitUseStrict": true,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node", "jest"],
+    "strict": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["./**/*.ts", "./**/*.js"],
   "exclude": [

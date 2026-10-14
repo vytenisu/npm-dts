@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
     "target": "ES5",
+    "module": "commonjs",
+    "esModuleInterop": false,
     "lib": ["es2015", "es2017", "dom"],
     "sourceMap": true,
     "skipLibCheck": true,
     "noImplicitAny": true,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["node", "jest"],
+    "strict": false,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["./**/*.ts"],
   "exclude": [
